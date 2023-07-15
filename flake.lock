@@ -1,6 +1,6 @@
 {
   "nodes": {
-    "fenix": {
+    "fenix-flake": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -77,7 +77,7 @@
     },
     "root": {
       "inputs": {
-        "fenix": "fenix",
+        "fenix-flake": "fenix-flake",
         "flake-utils": "flake-utils",
         "naersk": "naersk",
         "nixpkgs": "nixpkgs"
