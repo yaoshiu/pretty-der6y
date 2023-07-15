@@ -23,7 +23,7 @@
           stable.rustc
         ];
       in
-      {
+      rec {
         packages.default =
 
           (naersk.lib.${system}.override {
@@ -44,6 +44,10 @@
             openssl
           ];
         };
+
+        overlays.default = (self: super: {
+          pretty-derby = packages.default;
+        });
       });
 }
 
