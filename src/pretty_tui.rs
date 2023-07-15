@@ -77,13 +77,14 @@ enum Widget {
 /// tui.welcome()?;
 /// ```
 pub struct Tui<'a, B: Backend> {
+    account: String,
+    cursorpos: u16,
     input_mode: InputMode,
     logger: Arc<TuiLogger<'a>>,
-    terminal: Rc<RefCell<Terminal<B>>>,
-    account: String,
+    mileage_percent: u16,
     password: String,
-    mileage: u16,
     selected: Widget,
+    terminal: Rc<RefCell<Terminal<B>>>,
 }
 
 impl<'a, B: Backend + Write> Tui<'a, B> {
@@ -93,12 +94,13 @@ impl<'a, B: Backend + Write> Tui<'a, B> {
 
         let terminal = Terminal::new(backend)?;
         Ok(Self {
+            cursorpos: 0,
             input_mode: InputMode::Normal,
             logger,
             terminal: Rc::new(RefCell::new(terminal)),
             account: String::new(),
             password: String::new(),
-            mileage: 0,
+            mileage_percent: 100,
             selected: Widget::Account,
         })
     }
@@ -206,28 +208,22 @@ impl<B: Backend + Write> Tui<'_, B> {
                 self.select(KeyCode::Down);
                 None
             }
-            KeyCode::Char(c) => match c {
-                'q' => Some(()),
-                'j' => {
-                    self.select(KeyCode::Down);
-                    None
-                }
-                'k' => {
-                    self.select(KeyCode::Up);
-                    None
-                }
-                'i' => {
-                    self.input_mode = InputMode::Editing;
-                    None
-                }
-                'a' => {
-                    self.input_mode = InputMode::Editing;
-                    None
-                }
-                _ => None,
-            },
-            KeyCode::Enter => {
+            KeyCode::Char('q') => Some(()),
+            KeyCode::Char('j') => {
+                self.select(KeyCode::Down);
+                None
+            }
+            KeyCode::Char('k') => {
+                self.select(KeyCode::Up);
+                None
+            }
+            KeyCode::Enter | KeyCode::Char('i') | KeyCode::Char('a') => {
                 self.input_mode = InputMode::Editing;
+                self.cursorpos = match self.selected {
+                    Widget::Account => self.account.len(),
+                    Widget::Password => self.password.len(),
+                    _ => 0,
+                } as u16;
                 None
             }
             _ => None,
@@ -244,6 +240,7 @@ impl<B: Backend + Write> Tui<'_, B> {
             KeyCode::Enter => match self.selected {
                 Widget::Account => {
                     self.select(KeyCode::Down);
+                    self.cursorpos = self.password.len() as u16;
                     None
                 }
                 Widget::Password => {
@@ -251,39 +248,59 @@ impl<B: Backend + Write> Tui<'_, B> {
                     None
                 }
                 Widget::Mileage => {
-                    Some((self.account.clone(), self.password.clone(), self.mileage))
+                    Some((self.account.clone(), self.password.clone(), self.mileage_percent))
                 }
             },
-            KeyCode::Backspace => match self.selected {
+            KeyCode::Tab => match self.selected {
                 Widget::Account => {
-                    self.account.pop();
+                    self.select(KeyCode::Down);
+                    self.cursorpos = self.password.len() as u16;
                     None
                 }
                 Widget::Password => {
-                    self.password.pop();
+                    self.select(KeyCode::Down);
+                    None
+                }
+                _ => None
+            },
+            KeyCode::Backspace => match self.selected {
+                Widget::Account => {
+                    if self.cursorpos > 0 {
+                        self.cursorpos -= 1;
+                        self.account.remove(self.cursorpos as usize);
+                    }
+                    None
+                }
+                Widget::Password => {
+                    if self.cursorpos > 0 {
+                        self.cursorpos -= 1;
+                        self.password.pop();
+                    }
                     None
                 }
                 _ => None,
             },
             KeyCode::Char(c) => match self.selected {
                 Widget::Account => {
-                    self.account.push(c);
+                    self.account.insert(self.cursorpos as usize, c);
+                    self.cursorpos += 1;
                     None
                 }
                 Widget::Password => {
-                    self.password.push(c);
+                    self.password.insert(self.cursorpos as usize, c);
+                    self.cursorpos += 1;
                     None
                 }
                 Widget::Mileage => match c {
                     'h' => {
-                        if self.mileage > 0 {
-                            self.mileage -= 1;
+                        if self.mileage_percent > 0 {
+                            self.mileage_percent -= 1;
                         }
                         None
                     }
                     'l' => {
-                        if self.mileage < 100 {
-                            self.mileage += 1;
+                        if self.mileage_percent < 100 {
+                            self.mileage_percent += 1;
                         }
                         None
                     }
@@ -292,21 +309,35 @@ impl<B: Backend + Write> Tui<'_, B> {
             },
             KeyCode::Left => match self.selected {
                 Widget::Mileage => {
-                    if self.mileage > 0 {
-                        self.mileage -= 1;
+                    if self.mileage_percent > 0 {
+                        self.mileage_percent -= 1;
                     }
                     None
                 }
-                _ => None,
+                Widget::Account | Widget::Password => {
+                    if self.cursorpos > 0 {
+                        self.cursorpos -= 1;
+                    }
+                    None
+                }
             },
             KeyCode::Right => match self.selected {
                 Widget::Mileage => {
-                    if self.mileage < 100 {
-                        self.mileage += 1;
+                    if self.mileage_percent < 100 {
+                        self.mileage_percent += 1;
                     }
                     None
                 }
-                _ => None,
+                Widget::Account | Widget::Password => {
+                    if self.cursorpos < match self.selected {
+                        Widget::Account => self.account.len(),
+                        Widget::Password => self.password.len(),
+                        _ => 0,
+                    } as u16 {
+                        self.cursorpos += 1;
+                    }
+                    None
+                }
             },
             _ => None,
         }
@@ -465,7 +496,7 @@ impl<B: Backend + Write> Tui<'_, B> {
                 _ => Block::default().title("password").borders(Borders::ALL),
             });
         let mileage = Gauge::default()
-            .percent(self.mileage)
+            .percent(self.mileage_percent)
             .block(match self.selected {
                 Widget::Mileage => match self.input_mode {
                     InputMode::Editing => border_editing.clone().title("mileage"),
@@ -475,8 +506,8 @@ impl<B: Backend + Write> Tui<'_, B> {
             })
             .gauge_style(Style::default().fg(Color::White))
             .label(Span::styled(
-                format!("{}/{} km", self.mileage as f64 * 5. / 100., 5.),
-                Style::default().fg(Color::Blue),
+                format!("{}/{} km", self.mileage_percent as f64 * 5. / 100., 5.),
+                Style::default().fg(Color::Yellow),
             ));
 
         frame.render_widget(account, chunks[0]);
@@ -485,13 +516,8 @@ impl<B: Backend + Write> Tui<'_, B> {
 
         match self.input_mode {
             InputMode::Editing => match self.selected {
-                Widget::Account => {
-                    frame.set_cursor(chunks[0].x + self.account.len() as u16 + 1, chunks[0].y + 1)
-                }
-                Widget::Password => frame.set_cursor(
-                    chunks[1].x + self.password.len() as u16 + 1,
-                    chunks[1].y + 1,
-                ),
+                Widget::Account => frame.set_cursor(chunks[0].x + self.cursorpos + 1, chunks[0].y + 1),
+                Widget::Password => frame.set_cursor(chunks[1].x + self.cursorpos + 1, chunks[1].y + 1),
                 _ => {}
             },
             _ => {}
