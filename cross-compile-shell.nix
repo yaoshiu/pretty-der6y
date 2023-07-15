@@ -5,9 +5,9 @@ pkgs.pkgsStatic.callPackage
     nativeBuildInputs =
       let
         toolchain = with fenix; combine [
-          latest.rustc
-          latest.cargo
-          targets.x86_64-pc-windows-gnu.latest.rust-std
+          stable.rustc
+          stable.cargo
+          targets.x86_64-pc-windows-gnu.stable.rust-std
         ]; in
       [
         openssl
