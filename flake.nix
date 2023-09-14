@@ -19,50 +19,67 @@
           inherit system;
         };
         fenix = fenix-flake.packages.${system};
-        toolchain = with fenix; combine [
-          stable.cargo
-          stable.rustc
+        common-toolchain = with fenix; [
+          minimal.cargo
+          minimal.rustc
         ];
+        mkToolchain = target: with fenix;
+          combine ([ targets.${target}.latest.rust-std ] ++ common-toolchain);
+        mkNaersk = toolchain: naersk.lib.${system}.override {
+          cargo = toolchain;
+          rustc = toolchain;
+        };
       in
       rec {
         packages.default =
-
-          (naersk.lib.${system}.override {
-            cargo = toolchain;
-            rustc = toolchain;
-          }).buildPackage {
+          let
+            toolchain = fenix.combine common-toolchain;
+          in
+          (mkNaersk toolchain).buildPackage {
             nativeBuildInputs = with pkgs; [
               pkg-config
+            ];
+
+            buildInputs = with pkgs; [
               openssl
             ];
             src = ./.;
           };
 
-        devShells.default = pkgs.mkShell {
-          nativeBuildInputs = with pkgs; [
-            toolchain
-            pkg-config
-            openssl
-          ];
-        };
+        packages.x86_64-pc-windows-gnu =
+          let
+            target = "x86_64-pc-windows-gnu";
+            toolchain = mkToolchain target;
+          in
+          (mkNaersk toolchain).buildPackage {
+            src = ./.;
+            strictDeps = true;
 
-        devShells.x86_64-windows = pkgs.pkgsCross.mingwW64.callPackage
-          ({ mkShell, openssl, pkg-config, windows }:
-            let toolchain = with fenix; combine [
-              stable.rustc
-              stable.cargo
-              targets.x86_64-pc-windows-gnu.stable.rust-std
-            ]; in
-            mkShell {
-              nativeBuildInputs = [
-                openssl
-                pkg-config
+            depsBuildBuild = with pkgs.pkgsCross.mingwW64; [
+              stdenv.cc
+              windows.pthreads
+            ];
+
+            nativeBuildInputs = with pkgs; [
+              pkg-config
+              openssl
+            ];
+
+            CARGO_BUILD_TARGET = target;
+          };
+
+        devShells.default =
+          let
+            toolchain = common-toolchain;
+          in
+          pkgs.mkShell {
+            nativeBuildInputs = with pkgs;
+              [
                 toolchain
+                pkg-config
+                openssl
               ];
-
-              buildInputs = [ windows.pthreads ];
-            })
-          { };
+          };
 
         overlays.default = (self: super: {
           pretty-derby = packages.default;
