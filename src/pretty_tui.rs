@@ -248,6 +248,7 @@ impl<B: Backend + Write> Tui<'_, B> {
                     None
                 }
                 Widget::Mileage => {
+                    self.input_mode = InputMode::Normal;
                     Some((self.account.clone(), self.password.clone(), self.mileage_percent))
                 }
             },
