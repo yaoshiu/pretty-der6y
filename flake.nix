@@ -68,6 +68,36 @@
             CARGO_BUILD_TARGET = target;
           };
 
+        packages.aarch64-unknown-linux-musl =
+          let
+            target = "aarch64-unknown-linux-musl";
+            toolchain = mkToolchain target;
+            targetCc = pkgs.pkgsCross.aarch64-multiplatform-musl.pkgsStatic.stdenv.cc;
+          in
+          (mkNaersk toolchain).buildPackage {
+            src = ./.;
+            strictDeps = true;
+
+            depsBuildBuild = [
+              targetCc
+            ];
+
+            nativeBuildInputs = with pkgs; [
+              toolchain
+              pkg-config
+            ];
+
+            buildInputs = with pkgs.pkgsCross.aarch64-multiplatform-musl.pkgsStatic; [
+              openssl
+            ];
+
+            CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER = "rust-lld";
+
+            CARGO_BUILD_TARGET = target;
+
+            CARGO_BUILD_RUSTFLAGS = "-C target-feature=+crt-static";
+          };
+
         devShells.default =
           let
             toolchain = common-toolchain;
