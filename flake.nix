@@ -46,6 +46,31 @@
             src = ./.;
           };
 
+        packages.x86_64-unknown-linux-musl =
+          let
+            target = "x86_64-unknown-linux-musl";
+            toolchain = mkToolchain target;
+          in
+          (mkNaersk toolchain).buildPackage {
+            src = ./.;
+            strictDeps = true;
+
+            depsBuildBuild = with pkgs.pkgsStatic; [
+              stdenv.cc
+            ];
+
+            nativeBuildInputs = with pkgs; [
+              pkg-config
+            ];
+
+            buildInputs = with pkgs.pkgsStatic; [
+              openssl
+            ];
+
+            CARGO_BUILD_TARGET = target;
+            CARGO_BUILD_RUSTFLAGS = "-C target-feature=+crt-static";
+          };
+
         packages.x86_64-pc-windows-gnu =
           let
             target = "x86_64-pc-windows-gnu";
@@ -83,7 +108,6 @@
             ];
 
             nativeBuildInputs = with pkgs; [
-              toolchain
               pkg-config
             ];
 
@@ -92,9 +116,7 @@
             ];
 
             CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER = "rust-lld";
-
             CARGO_BUILD_TARGET = target;
-
             CARGO_BUILD_RUSTFLAGS = "-C target-feature=+crt-static";
           };
 
