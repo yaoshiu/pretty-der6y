@@ -3,7 +3,8 @@ mod pretty_logger;
 mod pretty_tui;
 
 use account::Account;
-use clap::Parser;
+use clap::{ArgAction, CommandFactory, Parser};
+use clap_complete::{generate, Shell};
 use log::{error, Level, LevelFilter};
 use pretty_logger::{CliLogger, TuiLogger};
 use pretty_tui::Tui;
@@ -21,8 +22,11 @@ struct Cli {
     mileage: Option<f64>,
 
     /// Print verbose messages.
-    #[arg(short, long, action = clap::ArgAction::Count)]
+    #[arg(short, long, action = ArgAction::Count)]
     verbose: u8,
+
+    #[arg(long = "generate", action = ArgAction::Set)]
+    generator: Option<Shell>,
 }
 
 #[tokio::main]
@@ -35,7 +39,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         _ => (Level::Trace, LevelFilter::Trace),
     };
 
-    // TODO: Add the debug mode prompt
+    if let Some(generator) = cli.generator {
+        let mut cmd = Cli::command();
+        let name = cmd.get_name().to_string();
+        generate(generator, &mut cmd, name, &mut io::stdout());
+
+        return Ok(());
+    }
+
     if cli.username.is_some() {
         if cli.mileage.is_none() {
             error!("You must specify the mileage using `-m` when using the `-u`!");

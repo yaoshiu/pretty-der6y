@@ -320,7 +320,7 @@ impl Account {
             pace = 0.6 + rng.gen_range(-0.05..0.05);
         }
         let end_time = Local::now();
-        let start_time = end_time - Duration::seconds(keeptime);
+        let start_time = end_time - Duration::try_seconds(keeptime).unwrap();
 
         let signdigital = {
             self.hasher.update(
