@@ -94,3 +94,5 @@ jobs:
         with:
           files: |
             artifacts/*.tar.gz
+        permissions:
+          contents: write
