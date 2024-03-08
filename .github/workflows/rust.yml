@@ -20,12 +20,12 @@ jobs:
             os: ubuntu-latest
             dependency: |
               sudo apt-get update
-              sudo apt-get install openssl-devel pkg-config
+              sudo apt-get install openssl-dev pkg-config
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
             dependency: |
               sudo apt-get update
-              sudo apt-get install openssl-devel pkg-config
+              sudo apt-get install openssl-dev pkg-config
           - target: x86_64-apple-darwin
             os: macos-latest
             dependency: |
