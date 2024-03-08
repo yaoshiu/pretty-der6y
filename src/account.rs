@@ -225,14 +225,14 @@ impl Account {
         #[derive(Deserialize, Debug)]
         #[allow(non_snake_case)]
         struct RunningLimitsData {
-            dailyMileage: f64,
-            effectiveMileageEnd: f64,
-            effectiveMileageStart: f64,
-            limitationsGoalsSexInfoId: String,
-            scoringType: i64,
-            totalDayMileage: String,
-            totalWeekMileage: String,
-            weeklyMileage: f64,
+            dailyMileage: Option<f64>,
+            effectiveMileageEnd: Option<f64>,
+            effectiveMileageStart: Option<f64>,
+            limitationsGoalsSexInfoId: Option<String>,
+            scoringType: Option<i64>,
+            totalDayMileage: Option<String>,
+            totalWeekMileage: Option<String>,
+            weeklyMileage: Option<f64>,
         }
 
         #[derive(Deserialize)]
@@ -243,14 +243,26 @@ impl Account {
         debug!("Running limits response: {:#?}", res);
         let data = res.json::<RunningLimitsResult>().await?.data;
 
-        self.daily = data.dailyMileage;
-        self.day = data.totalDayMileage.parse()?;
-        self.end = data.effectiveMileageEnd;
-        self.limitation = data.limitationsGoalsSexInfoId;
-        self.scoring = data.scoringType;
-        self.start = data.effectiveMileageStart;
-        self.week = data.totalWeekMileage.parse()?;
-        self.weekly = data.weeklyMileage;
+        if data.dailyMileage.is_none()
+            || data.effectiveMileageEnd.is_none()
+            || data.effectiveMileageStart.is_none()
+            || data.limitationsGoalsSexInfoId.is_none()
+            || data.scoringType.is_none()
+            || data.totalDayMileage.is_none()
+            || data.totalWeekMileage.is_none()
+            || data.weeklyMileage.is_none()
+        {
+            return Err("Semester not started yet, Try again later.".into());
+        }
+
+        self.daily = data.dailyMileage.unwrap();
+        self.day = data.totalDayMileage.unwrap().parse()?;
+        self.end = data.effectiveMileageEnd.unwrap();
+        self.limitation = data.limitationsGoalsSexInfoId.unwrap();
+        self.scoring = data.scoringType.unwrap();
+        self.start = data.effectiveMileageStart.unwrap();
+        self.week = data.totalWeekMileage.unwrap().parse()?;
+        self.weekly = data.weeklyMileage.unwrap();
 
         info!("Get running limitation successful!");
         Ok(())
