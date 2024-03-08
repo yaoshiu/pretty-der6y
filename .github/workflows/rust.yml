@@ -87,7 +87,7 @@ jobs:
           path: artifacts
 
       - name: Archives
-        run: find artifacts -mindepth 1 -macdepth 1 -exec tar -C {} -cvzf {}.tar.gz . \;
+        run: find artifacts -mindepth 1 -maxdepth 1 -exec tar -C {} -cvzf {}.tar.gz . \;
 
       - name: Release
         uses: softprops/action-gh-release@v1
