@@ -45,7 +45,7 @@ jobs:
             ~/.rustup/settings.toml
             ~/.rustup/toolchains/${{ matrix.target }}-*
             ~/.rustup/toolchains/${{ matrix.target }}-*
-        key: toolchain-${{ matrix target }}
+        key: toolchain-${{ matrix.target }}
 
     - name: Cache Cargo
       uses: actions/cache@v4
