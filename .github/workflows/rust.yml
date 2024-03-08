@@ -18,32 +18,18 @@ jobs:
         include:
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
-            dependency: |
-              sudo apt-get update
-              sudo apt-get install libssl-dev pkg-config
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
-            dependency: |
-              sudo dpkg --add-architecture arm64
-              sudo apt-get update
-              sudo apt-get install pkg-config libssl-dev:arm64
           - target: x86_64-apple-darwin
             os: macos-latest
-            dependency: |
-              brew install openssl pkg-config
           - target: x86_64-windows-msvc
             os: windows-latest
-            dependency: |
-              choco install openssl pkgconfiglite
 
     runs-on: ${{ matrix.os }}
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-
-    - name: Dependency
-      run: ${{ matrix.dependency }}
 
     - name: Toolchain
       uses: actions-rs/toolchain@v1

@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    fenix-flake = {
+    fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -12,52 +12,50 @@
     };
   };
 
-  outputs = { fenix-flake, flake-utils, naersk, nixpkgs, self }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = (import nixpkgs) {
-          inherit system;
+  outputs = { fenix, flake-utils, naersk, nixpkgs, self }:
+    let
+      devOverlay = final: prev: rec {
+        darwinOptions = final.lib.optionalAttrsfinalal.stdenv.isDarwin {
+          buildInputs = with final.darwin.apple_sdk.frameworks; [
+            SystemConfiguration
+          ];
         };
-        fenix = fenix-flake.packages.${system};
-        common-toolchain = with fenix; [
+        system = final.hostPlatform.system;
+        toolchain = with fenix.packages.${system}; combine [
           minimal.cargo
           minimal.rustc
         ];
-        mkToolchain = target: with fenix;
-          combine ([ targets.${target}.latest.rust-std ] ++ common-toolchain);
-        mkNaersk = toolchain: naersk.lib.${system}.override {
+        naersk-lib = naersk.lib.${system}.override {
           cargo = toolchain;
           rustc = toolchain;
         };
+        pretty-derby = naersk-lib.buildPackage (darwinOptions // {
+          src = ./.;
+        });
+      };
+    in
+    {
+      overlays.default = final: prev: {
+        inherit (devOverlay) pretty-derby;
+      };
+    } //
+    (flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = (import nixpkgs) {
+          inherit system;
+          overlays = [ devOverlay ];
+        };
       in
-      rec {
-        packages.default =
-          let
-            toolchain = fenix.combine common-toolchain;
-          in
-          (mkNaersk toolchain).buildPackage {
-            nativeBuildInputs = with pkgs; [
-              pkg-config
-            ];
+      {
+        packages = rec {
+          pretty-derby = pkgs.pretty-derby;
+          default = pretty-derby;
+        };
 
-            buildInputs = with pkgs; [
-              openssl
-            ];
-            src = ./.;
-          };
 
-        devShells.default =
-          let
-            toolchain = common-toolchain;
-          in
-          pkgs.mkShell {
-            nativeBuildInputs = with pkgs;
-              [
-                toolchain
-                pkg-config
-                openssl
-              ];
-          };
-      });
+        devShells.default = pkgs.mkShell {
+          buildInputs = with pkgs; [
+          ];
+        };
+      }));
 }
-
