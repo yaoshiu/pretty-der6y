@@ -19,13 +19,13 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             dependency: |
-              apt-get update
-              apt-get install openssl pkg-config
+              sudo apt-get update
+              sudo apt-get install openssl pkg-config
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
             dependency: |
-              apt-get update
-              apt-get install openssl pkg-config
+              sudo apt-get update
+              sudo apt-get install openssl pkg-config
           - target: x86_64-apple-darwin
             os: macos-latest
             dependency: |
