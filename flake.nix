@@ -15,7 +15,7 @@
   outputs = { fenix, flake-utils, naersk, nixpkgs, self }:
     let
       devOverlay = final: prev: rec {
-        darwinOptions = final.lib.optionalAttrsfinalal.stdenv.isDarwin {
+        darwinOptions = final.lib.optionalAttrs final.stdenv.isDarwin {
           buildInputs = with final.darwin.apple_sdk.frameworks; [
             SystemConfiguration
           ];
@@ -53,9 +53,10 @@
         };
 
 
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
+        devShells.default = with pkgs; mkShell (darwinOptions // {
+          buildInputs = [
+            toolchain
           ];
-        };
+        });
       }));
 }
