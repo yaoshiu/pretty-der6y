@@ -24,8 +24,9 @@ jobs:
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
             dependency: |
+              sudo dpkg --add-architecture arm64
               sudo apt-get update
-              sudo apt-get install libssl-dev pkg-config
+              sudo apt-get install pkg-config libssl-dev:arm64
           - target: x86_64-apple-darwin
             os: macos-latest
             dependency: |
