@@ -70,7 +70,7 @@ jobs:
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.project }}_${{ matrix.target }}
+        name: ${{ env.project }}-${{ matrix.target }}
         path: |
           ./target/${{ matrix.target }}/release/${{ env.project }}
           ./target/${{ matrix.target }}/release/${{ env.project }}.exe
@@ -86,12 +86,11 @@ jobs:
         with:
           path: artifacts
 
-      - name: strip
-        shell: bash
-        run: strip artifacts/*
+      - name: Archives
+        run: find artifacts -mindepth 1 -macdepth 1 -exec tar -C {} -cvzf {}.tar.gz . \;
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/*
+            artifacts/*.tar.gz

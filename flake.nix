@@ -17,11 +17,6 @@
       overlays = rec {
         dev = final: prev:
           let
-            darwinOptions = final.lib.optionalAttrs final.stdenv.isDarwin {
-              nativeBuildInputs = with final.darwin.apple_sdk.frameworks; [
-                SystemConfiguration
-              ];
-            };
             system = final.hostPlatform.system;
             toolchain = with fenix.packages.${system}; combine [
               minimal.cargo
@@ -33,16 +28,21 @@
             };
           in
           {
-            pretty-derby = naersk-lib.buildPackage (darwinOptions // {
+            pretty-derby = naersk-lib.buildPackage {
+              nativeBuildInputs = with final; lib.optional stdenv.isDarwin [
+                darwin.apple_sdk.frameworks.SystemConfiguration
+              ];
               src = ./.;
-            });
+            };
 
-            pretty-derby-shell = final.mkShell (darwinOptions // {
+            pretty-derby-shell = with final; mkShell {
               buildInputs = [
                 toolchain
-                final.iconv
-              ];
-            });
+                iconv
+              ] ++ (lib.optional stdenv.isDarwin [
+                darwin.apple_sdk.frameworks.SystemConfiguration
+              ]);
+            };
           };
 
         default = final: prev: { inherit (dev) pretty-derby; };
