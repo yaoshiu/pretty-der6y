@@ -8,15 +8,95 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  project: pretty-derby
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: x86_64-windows-msvc
+            os: windows-latest
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: ${{ matrix.target }}
+        override: true
+
+    - name: Cache Rustup
+      uses: actions/cache@v4
+      with:
+        path: |
+            ~/.rustup/settings.toml
+            ~/.rustup/toolchains/${{ matrix.target }}-*
+            ~/.rustup/toolchains/${{ matrix.target }}-*
+        key: toolchain-${{ matrix target }}
+
+    - name: Cache Cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
     - name: Build
-      run: cargo build --verbose
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: build
+        args: --release --target=${{ matrix.target }}
+
     - name: Run tests
-      run: cargo test --verbose
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: test
+
+    - name: Upload
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.project }}_${{ matrix.target }}
+        path: |
+          ./target/${{ matrix.target }}/release/${{ env.project }}
+          ./target/${{ matrix.target }}/release/${{ env.project }}.exe
+
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [ test ]
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Download
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: strip
+        shell: bash
+        run: strip artifacts/*
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
