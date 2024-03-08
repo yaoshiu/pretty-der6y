@@ -58,10 +58,6 @@
                 openssl
               ];
           };
-
-        overlays.default = (self: super: {
-          pretty-derby = packages.default;
-        });
       });
 }
 
