@@ -5,7 +5,7 @@ mod pretty_tui;
 use account::Account;
 use clap::{ArgAction, CommandFactory, Parser};
 use clap_complete::{generate, Shell};
-use log::{error, Level, LevelFilter};
+use log::{debug, error, Level, LevelFilter};
 use pretty_logger::{CliLogger, TuiLogger};
 use pretty_tui::Tui;
 use std::{error::Error, io, sync::Arc};
@@ -57,6 +57,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let logger = CliLogger::new(level, stdout);
         log::set_boxed_logger(Box::new(logger)).map(|()| log::set_max_level(filter))?;
 
+        debug!(
+            "{} level is enabled.",
+            match cli.verbose {
+                0 => "Info",
+                1 => "Debug",
+                _ => "Trace",
+            }
+        );
+
         let username = cli.username.unwrap();
         let password = rpassword::prompt_password(format!("Password for {}: ", username))?;
         let mileage = cli.mileage.unwrap();
@@ -76,6 +85,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let logger = Arc::new(TuiLogger::new(level));
         let mut tui = Tui::new(backend, logger.clone())?;
         log::set_boxed_logger(Box::new(logger)).map(|()| log::set_max_level(filter))?;
+
+        debug!(
+            "{} level is enabled.",
+            match cli.verbose {
+                0 => "Info",
+                1 => "Debug",
+                _ => "Trace",
+            }
+        );
+
         tui.welcome()?;
         let mut t = tui.main()?;
         loop {

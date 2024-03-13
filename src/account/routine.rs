@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::{error::Error, fs, path::Path};
 use wkt::TryFromWkt;
 
-const DEFAULT_ROUTINE: &'static str = include_str!("../../data/default_routine.csv");
+const DEFAULT_ROUTINE: &str = include_str!("../../data/default_routine.csv");
 
 #[derive(Serialize)]
 pub struct LGPoint {
@@ -51,7 +51,7 @@ pub fn get_routine(
                 longitude: point.x() + rng.gen_range(-2e-5..2e-5),
                 latitude: point.y() + rng.gen_range(-1e-5..1e-5),
             };
-            mileage -= last.unwrap().geodesic_distance(&point) / 1000.;
+            mileage -= last.unwrap().geodesic_distance(point) / 1000.;
             last = Some(point);
 
             res.push(new);

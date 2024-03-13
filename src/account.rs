@@ -10,15 +10,16 @@ use serde_json::json;
 use sha1::{digest::FixedOutputReset, Digest, Sha1};
 use std::{collections::HashMap, error::Error};
 
-const URL_CURRENT: &'static str = "https://cpes.legym.cn/education/semester/getCurrent";
-const URL_GETRUNNINGLIMIT: &'static str = "https://cpes.legym.cn/running/app/getRunningLimit";
-const URL_GETVERSION: &'static str =
+const URL_CURRENT: &str = "https://cpes.legym.cn/education/semester/getCurrent";
+const URL_GETRUNNINGLIMIT: &str = "https://cpes.legym.cn/running/app/getRunningLimit";
+const URL_GETVERSION: &str =
     "https://cpes.legym.cn/authorization/mobileApp/getLastVersion?platform=2";
-const URL_LOGIN: &'static str = "https://cpes.legym.cn/authorization/user/manage/login";
-const URL_UPLOADRUNNING: &'static str = "https://cpes.legym.cn/running/app/v2/uploadRunningDetails";
+const URL_LOGIN: &str = "https://cpes.legym.cn/authorization/user/manage/login";
+const URL_UPLOADRUNNING: &str = "https://cpes.legym.cn/running/app/v2/uploadRunningDetails";
 
 const ORGANIZATION: HeaderName = HeaderName::from_static("organization");
-const HEADERS: [(HeaderName, &'static str); 9] = [
+
+const HEADERS: [(HeaderName, &str); 9] = [
     (ACCEPT, "*/*"),
     (ACCEPT_ENCODING, "gzip, deflate, br"),
     (ACCEPT_LANGUAGE, "zh-CN, zh-Hans;q=0.9"),
@@ -31,7 +32,7 @@ const HEADERS: [(HeaderName, &'static str); 9] = [
 ];
 
 const CALORIE_PER_MILEAGE: f64 = 58.3;
-const SALT: &'static str = "itauVfnexHiRigZ6";
+const SALT: &str = "itauVfnexHiRigZ6";
 
 pub struct Account {
     client: Client,
@@ -98,7 +99,7 @@ impl Account {
         let signdigital = {
             self.hasher
                 .update((username.to_string() + &password + "1" + SALT).as_bytes());
-            hex::encode(self.hasher.finalize_fixed_reset().to_vec())
+            hex::encode(self.hasher.finalize_fixed_reset())
         };
         let json = json!({
             "entrance": "1",
@@ -333,10 +334,10 @@ impl Account {
                     + &((mileage * 1000. / pace / 2.) as i64).to_string()
                     + &mileage.to_string()
                     + "1"
-                    + &SALT.to_string())
+                    + SALT)
                     .as_bytes(),
             );
-            hex::encode(self.hasher.finalize_fixed_reset().to_vec())
+            hex::encode(self.hasher.finalize_fixed_reset())
         };
         let json = json!({
             "appVersion": self.version,

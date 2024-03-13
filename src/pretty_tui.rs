@@ -15,7 +15,7 @@ use tui::{
     Frame, Terminal,
 };
 
-const TITLE: &'static str = r#"
+const TITLE: &str = r#"
 ╭────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │                                                                                                    │
 │  ██████╗ ██████╗ ███████╗████████╗████████╗██╗   ██╗    ██████╗ ███████╗██████╗ ██████╗ ██╗   ██╗  │
@@ -28,7 +28,7 @@ const TITLE: &'static str = r#"
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────╯
 "#;
 
-const TITLE2: &'static str = r#"
+const TITLE2: &str = r#"
 ██████╗ ██████╗ ███████╗████████╗████████╗██╗   ██╗    ██████╗ ███████╗██████╗ ██████╗ ██╗   ██╗
 ██╔══██╗██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝╚██╗ ██╔╝    ██╔══██╗██╔════╝██╔══██╗██╔══██╗╚██╗ ██╔╝
 ██████╔╝██████╔╝█████╗     ██║      ██║    ╚████╔╝     ██║  ██║█████╗  ██████╔╝██████╔╝ ╚████╔╝ 
@@ -37,7 +37,7 @@ const TITLE2: &'static str = r#"
 ╚═╝     ╚═╝  ╚═╝╚══════╝   ╚═╝      ╚═╝      ╚═╝       ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═════╝    ╚═╝   
 "#;
 
-const _TITLE3: &'static str = r#"
+const _TITLE3: &str = r#"
   ██████╗ ██████╗ ███████╗████████╗████████╗██╗   ██╗
   ██╔══██╗██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝╚██╗ ██╔╝
   ██████╔╝██████╔╝█████╗     ██║      ██║    ╚████╔╝ 
@@ -87,8 +87,10 @@ pub struct Tui<'a, B: Backend> {
     terminal: Rc<RefCell<Terminal<B>>>,
 }
 
+type PrettyTuiResult<A> = Result<A, Box<dyn Error>>;
+
 impl<'a, B: Backend + Write> Tui<'a, B> {
-    pub fn new(mut backend: B, logger: Arc<TuiLogger<'a>>) -> Result<Self, Box<dyn Error>> {
+    pub fn new(mut backend: B, logger: Arc<TuiLogger<'a>>) -> PrettyTuiResult<Self> {
         enable_raw_mode()?;
         execute!(backend, EnterAlternateScreen)?;
 
@@ -107,7 +109,7 @@ impl<'a, B: Backend + Write> Tui<'a, B> {
 }
 
 impl<B: Backend + Write> Tui<'_, B> {
-    pub fn quit(&self) -> Result<(), Box<dyn Error>> {
+    pub fn quit(&self) -> PrettyTuiResult<()> {
         disable_raw_mode()?;
         execute!(
             self.terminal.borrow_mut().backend_mut(),
@@ -117,7 +119,7 @@ impl<B: Backend + Write> Tui<'_, B> {
         Ok(())
     }
 
-    pub fn welcome(&self) -> Result<(), Box<dyn Error>> {
+    pub fn welcome(&self) -> PrettyTuiResult<()> {
         loop {
             self.terminal
                 .borrow_mut()
@@ -166,7 +168,7 @@ impl<B: Backend + Write> Tui<'_, B> {
         frame.render_widget(para, chunks[3]);
     }
 
-    pub fn main(&mut self) -> Result<Option<(String, String, u16)>, Box<dyn Error>> {
+    pub fn main(&mut self) -> PrettyTuiResult<Option<(String, String, u16)>> {
         loop {
             {
                 // WARN: Should make sure that the terminal dies immediately
@@ -181,7 +183,7 @@ impl<B: Backend + Write> Tui<'_, B> {
                     }
                     match self.input_mode {
                         InputMode::Normal => {
-                            if let Some(_) = self.handle_normal(key.code) {
+                            if self.handle_normal(key.code).is_some() {
                                 return Ok(None);
                             }
                         }
@@ -249,7 +251,11 @@ impl<B: Backend + Write> Tui<'_, B> {
                 }
                 Widget::Mileage => {
                     self.input_mode = InputMode::Normal;
-                    Some((self.account.clone(), self.password.clone(), self.mileage_percent))
+                    Some((
+                        self.account.clone(),
+                        self.password.clone(),
+                        self.mileage_percent,
+                    ))
                 }
             },
             KeyCode::Tab => match self.selected {
@@ -262,7 +268,7 @@ impl<B: Backend + Write> Tui<'_, B> {
                     self.select(KeyCode::Down);
                     None
                 }
-                _ => None
+                _ => None,
             },
             KeyCode::Backspace => match self.selected {
                 Widget::Account => {
@@ -330,11 +336,13 @@ impl<B: Backend + Write> Tui<'_, B> {
                     None
                 }
                 Widget::Account | Widget::Password => {
-                    if self.cursorpos < match self.selected {
-                        Widget::Account => self.account.len(),
-                        Widget::Password => self.password.len(),
-                        _ => 0,
-                    } as u16 {
+                    if self.cursorpos
+                        < match self.selected {
+                            Widget::Account => self.account.len(),
+                            Widget::Password => self.password.len(),
+                            _ => 0,
+                        } as u16
+                    {
                         self.cursorpos += 1;
                     }
                     None
@@ -346,12 +354,11 @@ impl<B: Backend + Write> Tui<'_, B> {
 
     fn select(&mut self, direction: KeyCode) {
         match self.selected {
-            Widget::Account => match direction {
-                KeyCode::Down => {
+            Widget::Account => {
+                if let KeyCode::Down = direction {
                     self.selected = Widget::Password;
                 }
-                _ => {}
-            },
+            }
 
             Widget::Password => match direction {
                 KeyCode::Up => {
@@ -363,16 +370,15 @@ impl<B: Backend + Write> Tui<'_, B> {
                 _ => {}
             },
 
-            Widget::Mileage => match direction {
-                KeyCode::Up => {
+            Widget::Mileage => {
+                if let KeyCode::Up = direction {
                     self.selected = Widget::Password;
                 }
-                _ => {}
-            },
+            }
         }
     }
 
-    fn ui_main(&self, frame: &mut Frame<B>) -> Result<(), Box<dyn Error>> {
+    fn ui_main(&self, frame: &mut Frame<B>) -> PrettyTuiResult<()> {
         let chunks = Layout::default()
             .margin(2)
             .direction(Direction::Vertical)
@@ -432,24 +438,20 @@ impl<B: Backend + Write> Tui<'_, B> {
             ],
         };
 
-        match self.selected {
-            Widget::Mileage => match self.input_mode {
-                InputMode::Editing => {
-                    help.push(Spans::from(vec![
-                        Span::styled("<Left>, h: ", Style::default().add_modifier(Modifier::BOLD)),
-                        Span::raw("reduce"),
-                    ]));
-                    help.push(Spans::from(vec![
-                        Span::styled(
-                            "<Right>, l: ",
-                            Style::default().add_modifier(Modifier::BOLD),
-                        ),
-                        Span::raw("increase"),
-                    ]));
-                }
-                _ => {}
-            },
-            _ => {}
+        if let Widget::Mileage = self.selected {
+            if let InputMode::Editing = self.input_mode {
+                help.push(Spans::from(vec![
+                    Span::styled("<Left>, h: ", Style::default().add_modifier(Modifier::BOLD)),
+                    Span::raw("reduce"),
+                ]));
+                help.push(Spans::from(vec![
+                    Span::styled(
+                        "<Right>, l: ",
+                        Style::default().add_modifier(Modifier::BOLD),
+                    ),
+                    Span::raw("increase"),
+                ]));
+            }
         };
 
         {
@@ -515,13 +517,16 @@ impl<B: Backend + Write> Tui<'_, B> {
         frame.render_widget(password, chunks[1]);
         frame.render_widget(mileage, chunks[2]);
 
-        match self.input_mode {
-            InputMode::Editing => match self.selected {
-                Widget::Account => frame.set_cursor(chunks[0].x + self.cursorpos + 1, chunks[0].y + 1),
-                Widget::Password => frame.set_cursor(chunks[1].x + self.cursorpos + 1, chunks[1].y + 1),
+        if let InputMode::Editing = self.input_mode {
+            match self.selected {
+                Widget::Account => {
+                    frame.set_cursor(chunks[0].x + self.cursorpos + 1, chunks[0].y + 1)
+                }
+                Widget::Password => {
+                    frame.set_cursor(chunks[1].x + self.cursorpos + 1, chunks[1].y + 1)
+                }
                 _ => {}
-            },
-            _ => {}
+            }
         }
 
         Ok(())
