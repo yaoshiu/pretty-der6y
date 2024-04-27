@@ -25,8 +25,8 @@ struct Cli {
     #[arg(short, long, action = ArgAction::Count)]
     verbose: u8,
 
-    #[arg(long = "generate", action = ArgAction::Set)]
-    generator: Option<Shell>,
+    #[arg(long, value_name = "SHELL")]
+    completion: Option<Shell>,
 }
 
 #[tokio::main]
@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         _ => (Level::Trace, LevelFilter::Trace),
     };
 
-    if let Some(generator) = cli.generator {
+    if let Some(generator) = cli.completion {
         let mut cmd = Cli::command();
         let name = cmd.get_name().to_string();
         generate(generator, &mut cmd, name, &mut io::stdout());
