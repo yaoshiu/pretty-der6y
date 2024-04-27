@@ -62,10 +62,20 @@
         devShells.default =
           with pkgs;
           mkShell {
-            buildInputs = [
-              toolchain
-              iconv
-            ] ++ (lib.optional stdenv.isDarwin [ darwin.apple_sdk.frameworks.SystemConfiguration ]);
+            buildInputs =
+              let
+                toolchain =
+                  with fenix.packages.${system};
+                  combine [
+                    minimal.cargo
+                    minimal.rustc
+                  ];
+              in
+              [
+                toolchain
+                iconv
+              ]
+              ++ (lib.optional stdenv.isDarwin [ darwin.apple_sdk.frameworks.SystemConfiguration ]);
           };
 
         formatter = pkgs.nixfmt-rfc-style;
