@@ -54,12 +54,12 @@ pub struct Account {
 }
 
 impl Account {
-    pub fn new() -> Result<Self, Box<dyn Error>> {
+    pub fn new() -> Self {
         let mut headers = HeaderMap::new();
         for (key, val) in HEADERS {
             headers.insert(key, val.parse().unwrap());
         }
-        Ok(Self {
+        Self {
             client: Client::new(),
             daily: 0.,
             day: 0.,
@@ -76,7 +76,7 @@ impl Account {
             version: String::new(),
             week: 0.,
             weekly: 0.,
-        })
+        }
     }
 
     pub async fn login(
