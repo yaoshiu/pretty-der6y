@@ -5,7 +5,7 @@ mod pretty_tui;
 use account::Account;
 use clap::{ArgAction, CommandFactory, Parser};
 use clap_complete::{generate, Shell};
-use log::{debug, error, Level, LevelFilter};
+use log::{debug, error, info, Level, LevelFilter};
 use pretty_logger::{CliLogger, TuiLogger};
 use pretty_tui::Tui;
 use std::{error::Error, io, sync::Arc};
@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let username = cli.username.unwrap();
         let password = rpassword::prompt_password(format!("Password for {}: ", username))?;
         let mileage = cli.mileage.unwrap();
-        let mut account = Account::new().unwrap();
+        let mut account = Account::new();
 
         if let Err(e) = account.login(username, password).await {
             error!("Login failed! Message: {:?}", e);
@@ -104,14 +104,27 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
 
             let (username, password, percent) = t.clone().unwrap();
-            let mileage = percent as f64 * 5. / 100.;
+            let mileage = percent as f64 * 7. / 100.;
             let task = task::spawn(async move {
-                let mut account = Account::new().unwrap();
+                let mut account = Account::new();
                 let username = username.clone();
+                if username.is_empty() {
+                    error!("Username cannot be empty!");
+                    return;
+                }
+                if password.is_empty() {
+                    error!("Password cannot be empty!");
+                    return;
+                }
+                if mileage == 0. {
+                    error!("Mileage cannot be zero!");
+                    return;
+                }
                 if let Err(e) = account.login(username, password).await {
                     error!("Login failed! Message: {:?}", e);
                     return;
                 }
+                info!("Will running for {} miles.", mileage);
                 if let Err(e) = account.upload_running(mileage, None).await {
                     error!("Upload running failed! Message: {:?}", e);
                 }
