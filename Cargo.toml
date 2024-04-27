@@ -31,3 +31,11 @@ sha1 = "0.10.5"
 tokio = { version = "1.32.0", features = ["full"] }
 tui = "0.19.0"
 wkt = "0.10.3"
+
+[profile.release]
+panic = "abort" # Strip expensive panic clean-up logic
+codegen-units = 1 # Compile crates one after another so the compiler can optimize better
+lto = true # Enables link to optimizations
+opt-level = "s" # Optimize for binary size
+strip = true # Remove debug symbols
+debug = false # Disable debug assertions
