@@ -1,5 +1,6 @@
 use crate::pretty_logger::TuiLogger;
 
+use chrono::Local;
 use crossterm::{
     event::{self, Event, KeyCode, KeyEventKind},
     execute,
@@ -57,6 +58,7 @@ enum Widget {
     Account,
     Password,
     Mileage,
+    Time,
 }
 
 /// A TUI with a welcome page and main page
@@ -78,6 +80,7 @@ pub struct Tui<'a, B: Backend> {
     logger: Arc<TuiLogger<'a>>,
     mileage_percent: u16,
     password: String,
+    time: String,
     selected: Widget,
     terminal: Rc<RefCell<Terminal<B>>>,
 }
@@ -99,6 +102,7 @@ impl<'a, B: Backend + Write> Tui<'a, B> {
             password: String::new(),
             mileage_percent: 100,
             selected: Widget::Account,
+            time: Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
         })
     }
 }
@@ -163,7 +167,7 @@ impl<B: Backend + Write> Tui<'_, B> {
         frame.render_widget(para, chunks[3]);
     }
 
-    pub fn main(&mut self) -> PrettyTuiResult<Option<(String, String, u16)>> {
+    pub fn main(&mut self) -> PrettyTuiResult<Option<(String, String, u16, String)>> {
         loop {
             {
                 // WARN: Should make sure that the terminal dies immediately
@@ -228,7 +232,7 @@ impl<B: Backend + Write> Tui<'_, B> {
     }
 
     // Some() for break the loop and return, None for continue.
-    fn handle_editing(&mut self, key: KeyCode) -> Option<(String, String, u16)> {
+    fn handle_editing(&mut self, key: KeyCode) -> Option<(String, String, u16, String)> {
         match key {
             KeyCode::Esc => {
                 self.input_mode = InputMode::Normal;
@@ -246,10 +250,15 @@ impl<B: Backend + Write> Tui<'_, B> {
                 }
                 Widget::Mileage => {
                     self.input_mode = InputMode::Normal;
+                    None
+                }
+                Widget::Time => {
+                    self.select(KeyCode::Down);
                     Some((
                         self.account.clone(),
                         self.password.clone(),
                         self.mileage_percent,
+                        self.time.clone(),
                     ))
                 }
             },
@@ -260,6 +269,10 @@ impl<B: Backend + Write> Tui<'_, B> {
                     None
                 }
                 Widget::Password => {
+                    self.select(KeyCode::Down);
+                    None
+                }
+                Widget::Time => {
                     self.select(KeyCode::Down);
                     None
                 }
@@ -277,6 +290,13 @@ impl<B: Backend + Write> Tui<'_, B> {
                     if self.cursorpos > 0 {
                         self.cursorpos -= 1;
                         self.password.pop();
+                    }
+                    None
+                }
+                Widget::Time => {
+                    if self.cursorpos > 0 {
+                        self.cursorpos -= 1;
+                        self.time.remove(self.cursorpos as usize);
                     }
                     None
                 }
@@ -308,6 +328,11 @@ impl<B: Backend + Write> Tui<'_, B> {
                     }
                     _ => None,
                 },
+                Widget::Time => {
+                    self.time.insert(self.cursorpos as usize, c);
+                    self.cursorpos += 1;
+                    None
+                }
             },
             KeyCode::Left => match self.selected {
                 Widget::Mileage => {
@@ -316,7 +341,7 @@ impl<B: Backend + Write> Tui<'_, B> {
                     }
                     None
                 }
-                Widget::Account | Widget::Password => {
+                Widget::Account | Widget::Password | Widget::Time => {
                     if self.cursorpos > 0 {
                         self.cursorpos -= 1;
                     }
@@ -330,11 +355,12 @@ impl<B: Backend + Write> Tui<'_, B> {
                     }
                     None
                 }
-                Widget::Account | Widget::Password => {
+                Widget::Account | Widget::Password | Widget::Time => {
                     if self.cursorpos
                         < match self.selected {
                             Widget::Account => self.account.len(),
                             Widget::Password => self.password.len(),
+                            Widget::Time => self.time.len(),
                             _ => 0,
                         } as u16
                     {
@@ -365,9 +391,19 @@ impl<B: Backend + Write> Tui<'_, B> {
                 _ => {}
             },
 
-            Widget::Mileage => {
-                if let KeyCode::Up = direction {
+            Widget::Mileage => match direction {
+                KeyCode::Up => {
                     self.selected = Widget::Password;
+                }
+                KeyCode::Down => {
+                    self.selected = Widget::Time;
+                }
+                _ => {}
+            },
+
+            Widget::Time => {
+                if let KeyCode::Up = direction {
+                    self.selected = Widget::Mileage;
                 }
             }
         }
@@ -380,7 +416,7 @@ impl<B: Backend + Write> Tui<'_, B> {
             .constraints(
                 [
                     Constraint::Length(11),
-                    Constraint::Length(9),
+                    Constraint::Length(12),
                     Constraint::Max(u16::MAX),
                 ]
                 .as_ref(),
@@ -469,6 +505,7 @@ impl<B: Backend + Write> Tui<'_, B> {
                 Constraint::Length(3),
                 Constraint::Length(3),
                 Constraint::Length(3),
+                Constraint::Length(3),
                 Constraint::Max(u16::MAX),
             ])
             .split(chunks[1]);
@@ -511,9 +548,18 @@ impl<B: Backend + Write> Tui<'_, B> {
                 Style::default().fg(Color::Yellow),
             ));
 
+        let time = Paragraph::new(self.time.clone()).block(match self.selected {
+            Widget::Time => match self.input_mode {
+                InputMode::Editing => border_editing.clone().title("Format: %Y-%m-%d %H:%M:%S"),
+                InputMode::Normal => border_selected.clone().title("time"),
+            },
+            _ => Block::default().title("time").borders(Borders::ALL),
+        });
+
         frame.render_widget(account, chunks[0]);
         frame.render_widget(password, chunks[1]);
         frame.render_widget(mileage, chunks[2]);
+        frame.render_widget(time, chunks[3]);
 
         if let InputMode::Editing = self.input_mode {
             match self.selected {
@@ -522,6 +568,9 @@ impl<B: Backend + Write> Tui<'_, B> {
                 }
                 Widget::Password => {
                     frame.set_cursor(chunks[1].x + self.cursorpos + 1, chunks[1].y + 1)
+                }
+                Widget::Time => {
+                    frame.set_cursor(chunks[3].x + self.cursorpos + 1, chunks[3].y + 1)
                 }
                 _ => {}
             }

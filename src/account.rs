@@ -2,7 +2,7 @@ mod routine;
 use log::{debug, info};
 use routine::*;
 
-use chrono::{Duration, Local};
+use chrono::{Duration, NaiveDateTime};
 use rand::{thread_rng, Rng};
 use reqwest::{header::*, Client};
 use serde::Deserialize;
@@ -279,6 +279,7 @@ impl Account {
     pub async fn upload_running(
         &mut self,
         mileage: f64,
+        datetime: NaiveDateTime,
         routefile: Option<String>,
     ) -> Result<(), Box<dyn Error>> {
         let headers: HeaderMap<HeaderValue> = (&HashMap::from([
@@ -327,8 +328,8 @@ impl Account {
             keeptime = (mileage * 1000.0 / 3.0) as i64 + rng.gen_range(-15..15);
             pace = 0.6 + rng.gen_range(-0.05..0.05);
         }
-        let end_time = Local::now();
-        let start_time = end_time - Duration::try_seconds(keeptime).unwrap();
+
+        let start_time = datetime - Duration::try_seconds(keeptime).unwrap();
 
         let signdigital = {
             self.hasher.update(
@@ -353,7 +354,7 @@ impl Account {
             "deviceType": "iPhone 13 Pro",
             "effectiveMileage": mileage,
             "effectivePart": 1,
-            "endTime": end_time.format("%Y-%m-%d %H:%M:%S").to_string(),
+            "endTime": datetime.format("%Y-%m-%d %H:%M:%S").to_string(),
             "gpsMileage": mileage,
             "keepTime": keeptime,
             "limitationsGoalsSexInfoId": self.limitation,

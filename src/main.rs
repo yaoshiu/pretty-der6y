@@ -3,6 +3,7 @@ mod pretty_logger;
 mod pretty_tui;
 
 use account::Account;
+use chrono::{Local, NaiveDateTime};
 use clap::{ArgAction, CommandFactory, Parser};
 use clap_complete::{generate, Shell};
 use log::{debug, error, info, Level, LevelFilter};
@@ -20,6 +21,9 @@ struct Cli {
 
     #[arg(short, long, value_name = "MILEAGE")]
     mileage: Option<f64>,
+
+    #[arg(short, long, value_name = "TIME", default_value_t = Local::now().format("%Y-%m-%d %H:%M:%S").to_string())]
+    time: String,
 
     /// Print verbose messages.
     #[arg(short, long, action = ArgAction::Count)]
@@ -75,7 +79,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
             error!("Login failed! Message: {:?}", e);
             return Ok(());
         }
-        if let Err(e) = account.upload_running(mileage, None).await {
+        if let Err(e) = account
+            .upload_running(
+                mileage,
+                NaiveDateTime::parse_from_str(&cli.time, "%Y-%m-%d %H:%M:%S").unwrap(),
+                None,
+            )
+            .await
+        {
             error!("Upload running failed! Message: {:?}", e);
         }
     } else {
@@ -105,7 +116,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
             let account = account_arc.clone();
 
-            let (username, password, percent) = t.clone().unwrap();
+            let (username, password, percent, time) = t.clone().unwrap();
             let mileage = percent as f64 * 7. / 100.;
             let task = task::spawn(async move {
                 let account_arc = account.clone();
@@ -128,7 +139,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     return;
                 }
                 info!("Will running for {} miles.", mileage);
-                if let Err(e) = account.upload_running(mileage, None).await {
+                if let Err(e) = account
+                    .upload_running(
+                        mileage,
+                        match NaiveDateTime::parse_from_str(&time, "%Y-%m-%d %H:%M:%S") {
+                            Ok(t) => t,
+                            Err(e) => {
+                                error!("Invalid time format! Message: {:?}", e);
+                                return;
+                            }
+                        },
+                        None,
+                    )
+                    .await
+                {
                     error!("Upload running failed! Message: {:?}", e);
                 }
             });
