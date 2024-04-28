@@ -432,7 +432,7 @@ impl<B: Backend + Write> Tui<'_, B> {
         };
 
         let start_index = if len > chunks_height {
-            len - (chunks[2].height as usize - 2)
+            len - (chunks_height - 2)
         } else {
             0
         };
@@ -550,7 +550,7 @@ impl<B: Backend + Write> Tui<'_, B> {
             })
             .gauge_style(Style::default().fg(Color::White))
             .label(Span::styled(
-                format!("{}/{} km", self.mileage_percent as f64 * 7. / 100., 7),
+                format!("{} %", self.mileage_percent as f64),
                 Style::default().fg(Color::Yellow),
             ));
 

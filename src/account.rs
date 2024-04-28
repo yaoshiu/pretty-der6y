@@ -278,7 +278,7 @@ impl Account {
 
     pub async fn upload_running(
         &mut self,
-        mileage: f64,
+        percent: f64,
         datetime: NaiveDateTime,
         routefile: Option<String>,
     ) -> Result<(), Box<dyn Error>> {
@@ -310,14 +310,20 @@ impl Account {
         ]))
             .try_into()?;
 
-        let mut mileage = mileage
-            .min(self.daily - self.day)
+        let maximum = (self.daily - self.day)
             .min(self.weekly - self.week)
             .min(self.end);
+        let mut mileage = maximum * (percent / 100.);
 
         if mileage < self.start {
-            return Err(format!("Effective mileage too low, minimum is {}", self.start).into());
+            return Err(format!(
+                "Effective mileage too low, minimum is {}, but your maximum is {}.",
+                self.start, maximum
+            )
+            .into());
         }
+
+        info!("Will running for {} miles...", mileage);
 
         let keeptime;
         let pace;
