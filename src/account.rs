@@ -2,7 +2,7 @@ mod routine;
 use log::{debug, info};
 use routine::*;
 
-use chrono::{Duration, NaiveDateTime};
+use chrono::{Datelike, Duration, Local, NaiveDateTime};
 use rand::{thread_rng, Rng};
 use reqwest::{header::*, Client};
 use serde::Deserialize;
@@ -310,9 +310,13 @@ impl Account {
         ]))
             .try_into()?;
 
-        let maximum = (self.daily - self.day)
-            .min(self.weekly - self.week)
-            .min(self.end);
+        let maximum = if Local::now().naive_local().ordinal() == datetime.ordinal() {
+            (self.daily - self.day)
+                .min(self.weekly - self.week)
+                .min(self.end)
+        } else {
+            self.end.min(self.daily).min(self.weekly)
+        };
         let mut mileage = maximum * percent / 100.;
 
         if mileage < self.start {
