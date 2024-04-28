@@ -425,7 +425,13 @@ impl<B: Backend + Write> Tui<'_, B> {
 
         let mut text = self.logger.get_message();
         let len = text.len();
-        let start_index = if len > chunks[2].height as usize - 2 {
+        let chunks_height = if chunks[2].height as i16 - 2 >= 0 {
+            chunks[2].height as usize - 2
+        } else {
+            0
+        };
+
+        let start_index = if len > chunks_height {
             len - (chunks[2].height as usize - 2)
         } else {
             0
