@@ -9,7 +9,7 @@ use log::{debug, error, info, Level, LevelFilter};
 use pretty_logger::{CliLogger, TuiLogger};
 use pretty_tui::Tui;
 use std::{error::Error, io, sync::Arc};
-use tokio::task;
+use tokio::{sync::Mutex, task};
 use tui::backend::CrosstermBackend;
 
 #[derive(Parser)]
@@ -95,6 +95,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         );
 
+        let account_arc = Arc::new(Mutex::new(Account::new()));
         tui.welcome()?;
         let mut t = tui.main()?;
         loop {
@@ -102,11 +103,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 tui.quit()?;
                 return Ok(());
             }
+            let account = account_arc.clone();
 
             let (username, password, percent) = t.clone().unwrap();
             let mileage = percent as f64 * 7. / 100.;
             let task = task::spawn(async move {
-                let mut account = Account::new();
+                let account_arc = account.clone();
+                let mut account = account_arc.lock().await;
                 let username = username.clone();
                 if username.is_empty() {
                     error!("Username cannot be empty!");

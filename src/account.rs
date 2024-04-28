@@ -51,6 +51,7 @@ pub struct Account {
     version: String,
     week: f64,
     weekly: f64,
+    logged_in: bool,
 }
 
 impl Account {
@@ -76,6 +77,7 @@ impl Account {
             version: String::new(),
             week: 0.,
             weekly: 0.,
+            logged_in: false,
         }
     }
 
@@ -84,10 +86,15 @@ impl Account {
         username: String,
         password: String,
     ) -> Result<(), Box<dyn Error>> {
+        if self.logged_in {
+            info!("Already logged in!");
+            return Ok(());
+        };
         self.get_token(username, password).await?;
         self.get_current().await?;
         self.get_version().await?;
         self.get_running_limit().await?;
+        self.logged_in = true;
         Ok(())
     }
 
@@ -308,7 +315,7 @@ impl Account {
             .min(self.end);
 
         if mileage < self.start {
-            return Err(String::from("Effective mileage too low").into());
+            return Err(format!("Effective mileage too low, minimum is {}", self.start).into());
         }
 
         let keeptime;
