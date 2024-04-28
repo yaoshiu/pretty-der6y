@@ -313,7 +313,7 @@ impl Account {
         let maximum = (self.daily - self.day)
             .min(self.weekly - self.week)
             .min(self.end);
-        let mut mileage = maximum * (percent / 100.);
+        let mut mileage = maximum * percent / 100.;
 
         if mileage < self.start {
             return Err(format!(
