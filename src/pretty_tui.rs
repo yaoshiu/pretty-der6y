@@ -432,7 +432,7 @@ impl<B: Backend + Write> Tui<'_, B> {
         };
 
         let start_index = if len > chunks_height {
-            len - (chunks_height - 2)
+            len - chunks_height
         } else {
             0
         };
