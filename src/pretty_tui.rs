@@ -249,11 +249,12 @@ impl<B: Backend + Write> Tui<'_, B> {
                     None
                 }
                 Widget::Mileage => {
-                    self.input_mode = InputMode::Normal;
+                    self.select(KeyCode::Down);
+                    self.cursorpos = self.time.len() as u16;
                     None
                 }
                 Widget::Time => {
-                    self.select(KeyCode::Down);
+                    self.input_mode = InputMode::Normal;
                     Some((
                         self.account.clone(),
                         self.password.clone(),
@@ -575,9 +576,7 @@ impl<B: Backend + Write> Tui<'_, B> {
                 Widget::Password => {
                     frame.set_cursor(chunks[1].x + self.cursorpos + 1, chunks[1].y + 1)
                 }
-                Widget::Time => {
-                    frame.set_cursor(chunks[3].x + self.cursorpos + 1, chunks[3].y + 1)
-                }
+                Widget::Time => frame.set_cursor(chunks[3].x + self.cursorpos + 1, chunks[3].y + 1),
                 _ => {}
             }
         }
