@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>顶部弹窗</title>
+        <style>
+            .top-popup {
+                position: fixed;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #f44336;
+                color: white;
+                padding: 16px;
+                z-index: 1000;
+                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+                display: none;
+            }
+
+            .close-btn {
+                margin-left: 20px;
+                background: none;
+                color: white;
+                border: none;
+                cursor: pointer;
+                font-size: 18px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div id="popup" class="top-popup">
+            这是一个悬浮在顶部的弹窗！
+            <button class="close-btn" onclick="closePopup()">×</button>
+        </div>
+
+        <button onclick="showPopup()">显示弹窗</button>
+
+        <script>
+            function showPopup() {
+                document.getElementById("popup").style.display = "block";
+            }
+
+            function closePopup() {
+                document.getElementById("popup").style.display = "none";
+            }
+        </script>
+
+    </body>
+
+</html>
