@@ -3029,7 +3029,6 @@ name = "pretty-derby-1"
 version = "0.1.0"
 dependencies = [
  "leptos",
- "lib",
  "log",
  "web-sys",
 ]
