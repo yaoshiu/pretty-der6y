@@ -7,10 +7,6 @@ on:
 
 jobs:
   publish-tauri:
-    defaults:
-      run:
-        working-directory: ./tauri-app
-
     permissions:
       contents: write
     strategy:
@@ -53,6 +49,7 @@ jobs:
 
       - name: install frontend dependencies
         run: bun install
+        working-directory: ./tauri-app
 
       - uses: tauri-apps/tauri-action@v0
         env:
