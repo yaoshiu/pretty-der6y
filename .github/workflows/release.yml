@@ -64,5 +64,5 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
-          projectPAth: ./tauri-app
+          projectPath: ./tauri-app
           tauriScript: bun tauri
