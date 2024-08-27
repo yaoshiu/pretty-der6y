@@ -1,7 +1,7 @@
 {
-  "productName": "tauri-app",
-  "version": "0.0.0",
-  "identifier": "com.tauri.dev",
+  "productName": "Pretty Der6y",
+  "version": "0.1.0",
+  "identifier": "moe.phieash.pretty-der6y",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -12,8 +12,12 @@
     "windows": [
       {
         "title": "tauri-app",
-        "width": 800,
-        "height": 600
+        "width": 987,
+        "height": 610,
+        "decorations": false,
+        "center": true,
+        "dragDropEnabled": false,
+        "maximizable": false
       }
     ],
     "security": {

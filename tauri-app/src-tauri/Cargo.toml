@@ -1,14 +1,14 @@
 [package]
-name = "tauri-app"
-version = "0.0.0"
-description = "A Tauri App"
+name = "Pretty Der6y"
+version = "0.1.0"
+description = "Hachimi hachimi hachimi~"
 authors = ["you"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "tauri_app_lib"
+name = "pretty-der6y-lib"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [build-dependencies]
@@ -19,4 +19,5 @@ tauri = { version = "2.0.0-rc", features = [] }
 tauri-plugin-shell = "2.0.0-rc"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-
+lib = { version = "0.1.0", path = "../../lib" }
+chrono = "0.4.38"

@@ -1,9 +1,0 @@
-[package]
-name = "pretty-derby-1"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-leptos = { version = "0.6.13", features = ["csr", "nightly"] }
-log = { version = "0.4.22", features = ["std"] }
-web-sys = { version = "0.3.69", features = ["DomRect", "Element"] }

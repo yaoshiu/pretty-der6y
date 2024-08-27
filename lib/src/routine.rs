@@ -1,11 +1,54 @@
-use csv::Reader;
 use geo::{prelude::*, Point};
 use rand::{thread_rng, Rng};
-use serde::{Deserialize, Serialize};
-use std::{error::Error, fs, path::Path};
-use wkt::TryFromWkt;
+use serde::Serialize;
+use std::{error::Error, f64::consts::PI};
 
-const DEFAULT_ROUTINE: &str = include_str!("../assets/routine.csv");
+// WGS-84 to GCJ-02 (Mars Coordinate System) conversion
+// Only valid for coordinates within China.
+fn wgs84_to_gcj02(lat: f64, lon: f64) -> (f64, f64) {
+    const A: f64 = 6378245.;
+    const EE: f64 = 0.006_693_421_622_965_943;
+
+    fn transform_lat(x: f64, y: f64) -> f64 {
+        let mut ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * x.abs().sqrt();
+        ret += (20.0 * (6.0 * x * PI).sin() + 20.0 * (2.0 * x * PI).sin()) * 2.0 / 3.0;
+        ret += (20.0 * (y * PI).sin() + 40.0 * (y / 3.0 * PI).sin()) * 2.0 / 3.0;
+        ret += (160.0 * (y / 12.0 * PI).sin() + 320.0 * (y * PI / 30.0).sin()) * 2.0 / 3.0;
+        ret
+    }
+
+    fn transform_lon(x: f64, y: f64) -> f64 {
+        let mut ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * x.abs().sqrt();
+        ret += (20.0 * (6.0 * x * PI).sin() + 20.0 * (2.0 * x * PI).sin()) * 2.0 / 3.0;
+        ret += (20.0 * (x * PI).sin() + 40.0 * (x / 3.0 * PI).sin()) * 2.0 / 3.0;
+        ret += (150.0 * (x / 12.0 * PI).sin() + 300.0 * (x / 30.0 * PI).sin()) * 2.0 / 3.0;
+        ret
+    }
+
+    fn out_of_china(lat: f64, lon: f64) -> bool {
+        if !(72.004..=137.8347).contains(&lon) {
+            return true;
+        }
+        if !(0.8293..=55.8271).contains(&lat) {
+            return true;
+        }
+        false
+    }
+
+    if out_of_china(lat, lon) {
+        return (lat, lon);
+    }
+
+    let mut dlat = transform_lat(lon - 105.0, lat - 35.0);
+    let mut dlon = transform_lon(lon - 105.0, lat - 35.0);
+    let radlat = lat / 180.0 * PI;
+    let magic = (1.0 - EE * radlat.sin() * radlat.sin()).sqrt();
+    dlat = (dlat * 180.0) / ((A * (1.0 - EE)) / (magic * magic) * PI);
+    dlon = (dlon * 180.0) / (A / magic * radlat.cos() * PI);
+    let mglat = lat + dlat;
+    let mglon = lon + dlon;
+    (mglat, mglon)
+}
 
 #[derive(Serialize)]
 pub struct LGPoint {
@@ -13,50 +56,46 @@ pub struct LGPoint {
     latitude: f64,
 }
 
-pub fn get_routine(
-    mut mileage: f64,
-    filepath: Option<String>,
-) -> Result<Vec<LGPoint>, Box<dyn Error>> {
-    let rdr = match filepath {
-        Some(fp) => fs::read_to_string(Path::new(&fp))?,
-        None => DEFAULT_ROUTINE.into(),
+pub fn get_routine(mut mileage: f64, geojson_str: &str) -> Result<Vec<LGPoint>, Box<dyn Error>> {
+    let mut ponits = Vec::new();
+    let mut last = None;
+    let mut rng = thread_rng();
+    let geo_json: geojson::GeoJson = geojson_str.parse()?;
+    let features = match geo_json {
+        geojson::GeoJson::FeatureCollection(fc) => fc.features,
+        _ => return Err("Invalid GeoJSON".into()),
     };
 
-    let mut rdr = Reader::from_reader(rdr.as_bytes());
-    let mut rng = thread_rng();
+    let feature = features.first().ok_or("No feature found")?;
+    let geometry = feature.geometry.as_ref().ok_or("No geometry found")?;
+    let coordinates = match geometry.value {
+        geojson::Value::LineString(ref ls) => ls,
+        _ => return Err("Invalid geometry".into()),
+    };
 
-    let mut res = Vec::new();
-
-    #[derive(Deserialize)]
-    #[allow(non_snake_case)]
-    struct Record {
-        WKT: String,
+    if coordinates.is_empty() {
+        return Err("No coordinates found".into());
     }
 
-    let mut points: Vec<Point<f64>> = Vec::new();
-
-    for result in rdr.deserialize() {
-        let record: Record = result?;
-        let point: Point<f64> = Point::try_from_wkt_str(record.WKT.as_str())?;
-        points.push(point);
-    }
-    let mut last = None;
     loop {
-        for point in &points {
+        for coord in coordinates {
+            let (y, x) = wgs84_to_gcj02(coord[1], coord[0]);
+            let point = Point::new(x, y);
             if last.is_none() {
                 last = Some(point);
             }
 
             let new = LGPoint {
-                longitude: point.x() + rng.gen_range(-2e-5..2e-5),
-                latitude: point.y() + rng.gen_range(-1e-5..1e-5),
+                longitude: point.x() + rng.gen_range(-5e-6..5e-6),
+                latitude: point.y() + rng.gen_range(-5e-6..5e-6),
             };
-            mileage -= last.unwrap().geodesic_distance(point) / 1000.;
+            mileage -= last.unwrap().geodesic_distance(&point) / 1000.;
             last = Some(point);
 
-            res.push(new);
+            ponits.push(new);
+
             if mileage <= 0. {
-                return Ok(res);
+                return Ok(ponits);
             }
         }
     }

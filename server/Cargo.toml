@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chrono = "0.4.38"
+lib = { version = "0.1.0", path = "../lib" }
+tokio = { version = "1.39.3", features = ["full"] }

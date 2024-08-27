@@ -32,6 +32,7 @@ const HEADERS: [(HeaderName, &str); 9] = [
 ];
 
 const CALORIE_PER_MILEAGE: f64 = 58.3;
+const PACE: f64 = 360.;
 const SALT: &str = "itauVfnexHiRigZ6";
 
 #[derive(Clone, Default)]
@@ -55,6 +56,7 @@ pub struct Account {
 }
 
 impl Account {
+    /// Creates a new [`Account`].
     pub fn new() -> Self {
         let mut headers = HeaderMap::new();
         for (key, val) in HEADERS {
@@ -80,11 +82,7 @@ impl Account {
         }
     }
 
-    pub async fn login(
-        &mut self,
-        username: String,
-        password: String,
-    ) -> Result<(), Box<dyn Error>> {
+    pub async fn login(&mut self, username: &str, password: &str) -> Result<(), Box<dyn Error>> {
         self.set_token(username, password).await?;
         self.set_current().await?;
         self.set_version().await?;
@@ -92,14 +90,10 @@ impl Account {
         Ok(())
     }
 
-    async fn set_token(
-        &mut self,
-        username: String,
-        password: String,
-    ) -> Result<(), Box<dyn Error>> {
+    async fn set_token(&mut self, username: &str, password: &str) -> Result<(), Box<dyn Error>> {
         let signdigital = {
             self.hasher
-                .update((username.to_string() + &password + "1" + SALT).as_bytes());
+                .update((username.to_string() + password + "1" + SALT).as_bytes());
             hex::encode(self.hasher.finalize_fixed_reset())
         };
         let json = json!({
@@ -124,6 +118,7 @@ impl Account {
         }
 
         let res = res.error_for_status()?;
+        debug!("Login response: {:#?}", res);
 
         #[derive(Deserialize, Debug)]
         #[allow(non_snake_case)]
@@ -138,7 +133,6 @@ impl Account {
             data: LoginData,
         }
 
-        debug!("Login response: {:#?}", res);
         let data = res
             .json::<LoginResult>()
             .await
@@ -174,11 +168,15 @@ impl Account {
 
         #[derive(Deserialize)]
         struct CurrentResult {
-            data: CurrentData,
+            data: Option<CurrentData>,
         }
 
         debug!("Current response: {:#?}", res);
-        let data = res.json::<CurrentResult>().await?.data;
+        let data = res
+            .json::<CurrentResult>()
+            .await?
+            .data
+            .ok_or("Semester not started yet.")?;
 
         self.semester = data.id;
 
@@ -278,18 +276,22 @@ impl Account {
             self.week = total_week_mileage.parse()?;
             self.weekly = weekly_mileage;
         } else {
-            return Err("Semester not started yet, Try again later.".into());
+            return Err("Semester not started yet.".into());
         }
 
         info!("Get running limitation successful!");
         Ok(())
     }
 
+    pub fn daily(&self) -> f64 {
+        self.daily
+    }
+
     pub async fn upload_running(
         &mut self,
+        geojson_str: &str,
         mileage: f64,
         end_time: DateTime<Local>,
-        routefile: Option<String>,
     ) -> Result<(), Box<dyn Error>> {
         let headers: HeaderMap<HeaderValue> = (&HashMap::from([
             (
@@ -323,13 +325,13 @@ impl Account {
         }
 
         let keeptime;
-        let pace;
+        let pace_range;
         {
             // WARN: Must make sure that the rng dies before the await call
             let mut rng = thread_rng();
             mileage += rng.gen_range(-0.02..-0.001);
-            keeptime = (mileage * 1000.0 / 3.0) as i64 + rng.gen_range(-15..15);
-            pace = 0.6 + rng.gen_range(-0.05..0.05);
+            keeptime = (mileage * PACE) as i64 + rng.gen_range(-15..15);
+            pace_range = 0.6 + rng.gen_range(-0.05..0.05);
         }
 
         let start_time = end_time - Duration::try_seconds(keeptime).ok_or("Invalid duration")?;
@@ -342,7 +344,7 @@ impl Account {
                     + &((CALORIE_PER_MILEAGE * mileage) as i64).to_string()
                     + &((keeptime as f64 / mileage) as i64 * 1000).to_string()
                     + &keeptime.to_string()
-                    + &((mileage * 1000. / pace / 2.) as i64).to_string()
+                    + &((mileage * 1000. / pace_range / 2.) as i64).to_string()
                     + &mileage.to_string()
                     + "1"
                     + SALT)
@@ -361,9 +363,9 @@ impl Account {
             "gpsMileage": mileage,
             "keepTime": keeptime,
             "limitationsGoalsSexInfoId": self.limitation,
-            "paceNumber": (mileage * 1000. / pace / 2.) as i64,
-            "paceRange": pace,
-            "routineLine": get_routine(mileage, routefile)?,
+            "paceNumber": (mileage * 1000. / pace_range / 2.) as i64,
+            "paceRange": pace_range,
+            "routineLine": get_routine(mileage, geojson_str)?,
             "scoringType": self.scoring,
             "semesterId": self.semester,
             "signDigital": signdigital,
