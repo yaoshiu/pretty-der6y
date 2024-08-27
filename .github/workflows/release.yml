@@ -49,7 +49,7 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: "./src-tauri -> target"
+          workspaces: "./tauri-app/src-tauri -> target"
 
       - name: install frontend dependencies
         run: bun install
@@ -64,3 +64,4 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+          projectPAth: ./tauri-app
