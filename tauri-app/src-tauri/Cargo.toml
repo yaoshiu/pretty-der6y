@@ -1,6 +1,6 @@
 [package]
-name = "Pretty Der6y"
-version = "0.1.0"
+name = "pretty-der6y"
+version = "2.0.0"
 description = "Hachimi hachimi hachimi~"
 authors = ["you"]
 edition = "2021"
@@ -8,7 +8,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "pretty-der6y-lib"
+name = "tauri_app_lib"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [build-dependencies]
