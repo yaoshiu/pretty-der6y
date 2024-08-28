@@ -4,7 +4,7 @@ MD033:
  -->
 
 <h1 align=center>
-    <img src="./tauri-app/public/favicon.svg" alt="icon" width="24" height="24" />
+    <img src="./assets/icon.svg" alt="icon" width="24" height="24" />
     Pretty Derby
 </h1>
 
