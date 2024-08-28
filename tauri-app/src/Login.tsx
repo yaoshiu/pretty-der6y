@@ -23,7 +23,7 @@ export default function Login() {
       first={
         <Background src={image}>
           <div class="h-full flex items-center justify-center bg-black/30">
-            <h1 class="text-4xl font-bold text-white">Pretty Derby</h1>
+            <h1 class="text-4xl font-bold text-white">Pretty Der6y</h1>
           </div>
         </Background>
       }
