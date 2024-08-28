@@ -5,7 +5,7 @@ MD033:
 
 <h1 align=center>
     <img src="./assets/icon.svg" alt="icon" width="24" height="24" />
-    Pretty Derby
+    Pretty Der6y
 </h1>
 
 ![image](./docs/images/image.png)
