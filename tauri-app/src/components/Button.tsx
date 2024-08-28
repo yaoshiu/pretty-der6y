@@ -2,7 +2,7 @@ import { createSignal, For, mergeProps, splitProps, type JSX } from "solid-js";
 
 export const Button = (
   props: JSX.ButtonHTMLAttributes<HTMLButtonElement> & {
-    pending?: boolean;
+    disabled?: boolean;
   }
 ) => {
   const merged = mergeProps(
@@ -11,11 +11,7 @@ export const Button = (
     },
     props
   );
-  const [local, others] = splitProps(merged, [
-    "onClick",
-    "children",
-    "pending",
-  ]);
+  const [local, others] = splitProps(merged, ["onClick", "children"]);
 
   const [ripples, setRipples] = createSignal<
     { x: number; y: number; size: number }[]
@@ -23,8 +19,8 @@ export const Button = (
 
   return (
     <button
+      {...others}
       class="w-full py-3 relative overflow-hidden rounded-lg transition-colors bg-indigo-600 disabled:bg-indigo-700 text-white hover:bg-indigo-700"
-      disabled={local.pending}
       onClick={(event) => {
         if (typeof local.onClick === "function") {
           local.onClick(event);
@@ -41,7 +37,6 @@ export const Button = (
         setRipples((prev) => [...prev, { x, y, size }]);
         setTimeout(() => setRipples((prev) => prev.slice(1)), 1000);
       }}
-      {...others}
     >
       {local.children}
 

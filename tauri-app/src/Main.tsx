@@ -21,7 +21,7 @@ export default function Main() {
 
   const mileage = createMemo(() => (percentage() * daily()) / 100);
 
-  let tick: number;
+  let tick: NodeJS.Timeout;
 
   onMount(() => {
     (function updateTime() {
@@ -70,9 +70,12 @@ export default function Main() {
 
   return (
     <TwoColumn
-      left={<Map class="w-full h-full" map={[map, setMap]} />}
-      right={
-        <div class="max-w-sm w-full p-8">
+      first={<Map class="w-full h-full" map={[map, setMap]} />}
+      second={
+        <div
+          class="overflow-y-auto md:overflow-y-hidden max-w-sm 
+          flex flex-col md:justify-center w-full h-full p-8"
+        >
           <h2 class="text-3xl font-bold text-gray-800 mb-6">UPLOAD</h2>
           <form
             class="space-y-4"
@@ -130,7 +133,9 @@ export default function Main() {
               file={[file, updateFile]}
               accept=".geojson,application/geo+json"
             />
-            <Button type="submit">Upload</Button>
+            <Button type="submit" disabled={pending()}>
+              Upload
+            </Button>
           </form>
         </div>
       }

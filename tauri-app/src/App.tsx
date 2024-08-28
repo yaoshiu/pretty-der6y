@@ -27,6 +27,7 @@ const Body = () => {
 
   onMount(async () => {
     try {
+      logger?.info("Checking for updates...");
       setUpdate(await check());
       logger?.info(
         update()?.available
@@ -65,6 +66,7 @@ const App = () => {
     <LoggerProvider>
       <div
         onContextMenu={(event) => {
+          // tricky way to enable right click on dev server
           if (window.location.hostname == "tauri.localhost") {
             event.preventDefault();
           }
