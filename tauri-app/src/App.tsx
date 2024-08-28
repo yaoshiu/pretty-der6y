@@ -26,6 +26,11 @@ const Body = () => {
   onMount(async () => {
     try {
       const update = await check();
+      logger?.info(
+        update?.available
+          ? `${update?.version} is available! Downloading...`
+          : `Newest release!`
+      );
       await update?.downloadAndInstall((event) => {
         if (event.event === "Finished") {
           logger?.info("Update downloaded, restart to apply!");
