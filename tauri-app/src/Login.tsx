@@ -20,15 +20,15 @@ export default function Login() {
 
   return (
     <TwoColumn
-      left={
+      first={
         <Background src={image}>
           <div class="h-full flex items-center justify-center bg-black/30">
             <h1 class="text-4xl font-bold text-white">Pretty Derby</h1>
           </div>
         </Background>
       }
-      right={
-        <div class="max-w-sm w-full p-8">
+      second={
+        <div class="max-w-sm flex flex-col justify-center w-full h-full p-8">
           <h2 class="text-3xl font-bold text-gray-800 mb-6">LOGIN</h2>
           <form
             class="space-y-6"
@@ -76,7 +76,7 @@ export default function Login() {
               }}
               prefixContent={<Icon icon={faLock} class="text-gray-400" />}
             />
-            <Button type="submit" pending={pending()}>
+            <Button type="submit" disabled={pending()}>
               Login
             </Button>
           </form>
