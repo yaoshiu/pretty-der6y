@@ -1,6 +1,6 @@
 {
   "productName": "Pretty Der6y",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "identifier": "moe.phieash.pretty-der6y",
   "build": {
     "beforeDevCommand": "bun run dev",
@@ -27,6 +27,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -34,5 +35,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlFQjhFMTRFMzRFMjA4N0YKUldSL0NPSTBUdUc0bnFwNzgxb2tQUCtHMjFZUXFYNXllTDVnaHp4aTdsUXFwZzVWYitkNVd1OEcK",
+      "endpoints": [
+        "https://github.com/yaoshiu/pretty-der6y/releases/latest/download/latest.json"
+      ]
+    }
   }
 }
