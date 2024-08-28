@@ -73,7 +73,9 @@ const App = () => {
         }}
         class="select-none"
       >
-        <TittleBar />
+        <div class="hidden md:block">
+          <TittleBar />
+        </div>
         <LoginedContext.Provider value={[logined, setLogined]}>
           <Body />
         </LoginedContext.Provider>

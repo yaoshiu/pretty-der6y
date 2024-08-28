@@ -34,7 +34,7 @@ export const TittleBar = () => {
   return (
     <div
       data-tauri-drag-region
-      class="h-8 flex justify-end fixed top-0 left-0 right-0"
+      class="h-8 flex justify-end fixed top-0 left-0 right-0 z-[500]"
     >
       <TittleButton onClick={() => appWindow?.minimize()}>
         <Icon icon={faMinus} class="transition-all hover:drop-shadow-lg" />
