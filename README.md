@@ -1,4 +1,12 @@
-# Pretty Der6y
+<!-- markdownlint-configure-file
+MD033:
+  allowed_elements: [img, h1]
+ -->
+
+<h1 align=center>
+    <img src="./tauri-app/public/favicon.svg" alt="icon" width="24" height="24" />
+    Pretty Derby
+</h1>
 
 ![image](./docs/images/image.png)
 
@@ -6,8 +14,7 @@ A third-party running data upload client.
 
 ## Installation
 
-You can find the latest release [here](https://github.com/yaoshiu/pretty-der6y/releases/latest
-).
+You can find the latest release [here](https://github.com/yaoshiu/pretty-der6y/releases/latest).
 
 ### Build From Source
 
@@ -22,20 +29,24 @@ You can build the project from source by the following steps.
 #### Build Steps
 
 ```bash
-git clone https://github.com/yaoshiu/pretty-der6y.git # Clone the registry
+# Clone the registry
+git clone https://github.com/yaoshiu/pretty-der6y.git
 
-cd tauri-app # Move to the directory for the client application
+# Move to the directory for the client application
+cd tauri-app
 
-bun install # Install frontend dependencies
+# Install frontend dependencies
+bun install
 
-bun tauri build # Build the application
+# Build the application
+bun tauri build
 ```
 
 ## Usage
 
 ### Custom Route File
 
-The route file is in [GEOJSON](geojson.org) format. Route files for *Pretty Der6y* should contain exactly **ONE** feature with a **SINGLE** `LineString`.
+The route file is in [GEOJSON](geojson.org) format. Route files for _Pretty Der6y_ should contain exactly **ONE** feature with a **SINGLE** `LineString`.
 
 You can create your route in [georoute.io](georoute.io).
 
