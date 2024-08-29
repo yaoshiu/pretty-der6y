@@ -2,7 +2,7 @@ import * as L from "leaflet";
 import { type JSX, onMount, type Signal, splitProps } from "solid-js";
 import "leaflet/dist/leaflet.css";
 
-export const Map = (
+export const LeafletMap = (
   props: JSX.HTMLAttributes<HTMLDivElement> & {
     map: Signal<L.Map | undefined>;
   }
@@ -40,4 +40,4 @@ export const Map = (
   );
 };
 
-export default Map;
+export default LeafletMap;

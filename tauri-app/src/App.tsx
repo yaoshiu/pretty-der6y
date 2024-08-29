@@ -32,23 +32,23 @@ const Body = () => {
       logger?.info(
         update()?.available
           ? `${update()?.version} is available! Downloading...`
-          : `Newest release!`
+          : "Newest release!"
       );
       await update()?.download((event) => {
         if (event.event === "Finished") {
           logger?.info("Update downloaded, restart to apply!");
         }
       });
-    } catch (error: any) {
-      logger?.error(error.toString());
+    } catch (error) {
+      logger?.error(error as string);
     }
   });
 
   onCleanup(async () => {
     try {
       await update()?.install();
-    } catch (error: any) {
-      logger?.error(error.toString());
+    } catch (error) {
+      logger?.error(error as string);
     }
   });
 
@@ -67,7 +67,7 @@ const App = () => {
       <div
         onContextMenu={(event) => {
           // tricky way to enable right click on dev server
-          if (window.location.hostname == "tauri.localhost") {
+          if (window.location.hostname === "tauri.localhost") {
             event.preventDefault();
           }
         }}

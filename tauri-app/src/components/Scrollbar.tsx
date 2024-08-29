@@ -1,90 +1,99 @@
 import {
-  createSignal,
-  splitProps,
-  type JSX,
-  type ParentComponent,
+	createSignal,
+	splitProps,
+	type JSX,
+	type ParentComponent,
 } from "solid-js";
 
 const Scrollbar: ParentComponent<JSX.HTMLAttributes<HTMLDivElement>> = (
-  props
+	props,
 ) => {
-  const [local, others] = splitProps(props, ["children"]);
-  const [height, setHeight] = createSignal("");
-  const [top, setTop] = createSignal("0");
-  const [dragging, setDragging] = createSignal(false);
-  const [show, setShow] = createSignal(false);
+	const [local, others] = splitProps(props, ["children", "ref"]);
+	const [height, setHeight] = createSignal("");
+	const [top, setTop] = createSignal("0");
+	const [dragging, setDragging] = createSignal(false);
+	const [show, setShow] = createSignal(false);
 
-  const updateThumb: JSX.EventHandler<HTMLDivElement, Event> = (event) => {
-    const scrollableContent = event.currentTarget;
-    const contentHeight = scrollableContent.scrollHeight;
-    const scrollTop = scrollableContent.scrollTop;
-    const newThumbTop = (scrollTop / contentHeight) * 100;
-    setTop(`${newThumbTop}%`);
+	let scrollableContent!: HTMLDivElement;
 
-    const visibleHeight = scrollableContent.clientHeight;
-    const newThumbHeight = (visibleHeight / contentHeight) * 100;
-    setHeight(`${newThumbHeight}%`);
-  };
+	const updateThumb: JSX.EventHandler<HTMLDivElement, Event> = (event) => {
+		const scrollableContent = event.currentTarget;
+		const contentHeight = scrollableContent.scrollHeight;
+		const scrollTop = scrollableContent.scrollTop;
+		const newThumbTop = (scrollTop / contentHeight) * 100;
+		setTop(`${newThumbTop}%`);
 
-  const showThumb: JSX.EventHandler<HTMLDivElement, MouseEvent> = (event) => {
-    updateThumb(event);
-    setShow(true);
-  };
+		const visibleHeight = scrollableContent.clientHeight;
+		const newThumbHeight = (visibleHeight / contentHeight) * 100;
+		setHeight(`${newThumbHeight}%`);
+	};
 
-  const startDrag: JSX.EventHandler<HTMLDivElement, MouseEvent> = (event) => {
-    const scrollableContent = event.currentTarget.parentElement!;
-    const startY = event.clientY;
-    const scrollTop = scrollableContent.scrollTop;
-    setDragging(true);
+	const showThumb: JSX.EventHandler<HTMLDivElement, MouseEvent> = (event) => {
+		updateThumb(event);
+		setShow(true);
+	};
 
-    function onDrag(event: MouseEvent) {
-      const deltaY = event.clientY - startY;
-      const contentHeight = scrollableContent.scrollHeight;
-      const visibleHeight = scrollableContent.clientHeight;
-      const newScrollTop = scrollTop + (deltaY / visibleHeight) * contentHeight;
+	const startDrag: JSX.EventHandler<HTMLDivElement, MouseEvent> = (event) => {
+		const startY = event.clientY;
+		const scrollTop = scrollableContent.scrollTop;
+		setDragging(true);
 
-      scrollableContent.scrollTo({ top: newScrollTop });
-    }
+		function onDrag(event: MouseEvent) {
+			const deltaY = event.clientY - startY;
+			const contentHeight = scrollableContent.scrollHeight;
+			const visibleHeight = scrollableContent.clientHeight;
+			const newScrollTop = scrollTop + (deltaY / visibleHeight) * contentHeight;
 
-    function stopDrag() {
-      setDragging(false);
-      document.removeEventListener("mousemove", onDrag);
-      document.removeEventListener("mouseup", stopDrag);
-    }
+			scrollableContent.scrollTo({ top: newScrollTop });
+		}
 
-    document.addEventListener("mousemove", onDrag);
-    document.addEventListener("mouseup", stopDrag);
-  };
+		function stopDrag() {
+			setDragging(false);
+			document.removeEventListener("mousemove", onDrag);
+			document.removeEventListener("mouseup", stopDrag);
+		}
 
-  function hideThumb() {
-    setShow(false);
-  }
+		document.addEventListener("mousemove", onDrag);
+		document.addEventListener("mouseup", stopDrag);
+	};
 
-  return (
-    <div class="relative h-full overflow-hidden">
-      <div
-        {...others}
-        class="h-full overflow-y-scroll"
-        style={{
-          "scrollbar-width": "none",
-        }}
-        onScroll={updateThumb}
-        onMouseEnter={showThumb}
-        onMouseLeave={hideThumb}
-      >
-        {local.children}
-        <div
-          style={{ height: height(), top: top() }}
-          class="absolute right-0 w-2 bg-gray-400/50 hover:bg-gray-600/50 transition-opacity duration-300 rounded"
-          classList={{
-            "opacity-100": show() || dragging(),
-            "opacity-0": !show() && !dragging(),
-          }}
-          onMouseDown={startDrag}
-        />
-      </div>
-    </div>
-  );
+	function hideThumb() {
+		setShow(false);
+	}
+
+	return (
+		<div class="relative h-full overflow-hidden">
+			<div
+				{...others}
+				ref={(ref) => {
+					scrollableContent = ref;
+					if (typeof local.ref === "function") {
+						local.ref(ref);
+					} else {
+						local.ref = ref;
+					}
+				}}
+				class="h-full overflow-y-scroll"
+				style={{
+					"scrollbar-width": "none",
+				}}
+				onScroll={updateThumb}
+				onMouseEnter={showThumb}
+				onMouseLeave={hideThumb}
+			>
+				{local.children}
+				<div
+					style={{ height: height(), top: top() }}
+					class="absolute right-0 w-2 bg-gray-400/50 hover:bg-gray-600/50 transition-opacity duration-300 rounded"
+					classList={{
+						"opacity-100": show() || dragging(),
+						"opacity-0": !show() && !dragging(),
+					}}
+					onMouseDown={startDrag}
+				/>
+			</div>
+		</div>
+	);
 };
 
 export default Scrollbar;
