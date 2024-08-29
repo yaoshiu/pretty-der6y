@@ -52,7 +52,9 @@ You can create your route in [georoute.io](georoute.io).
 
 Check our example route file [here](./assets/map.geojson).
 
-## Special Thanks To
+## Credits
+
+Special thanks to:
 
 - The [Tauri](tauri.app) toolkit.
 
@@ -60,9 +62,7 @@ Check our example route file [here](./assets/map.geojson).
 
 - The [TailwindCSS](tailwindcss.com).
 
-## Image Sources
-
-The background image for the login page is from [Nardack - Pixiv](https://www.pixiv.net/artworks/89657320). Modification and distribution without the permission of the author is prohibited.
+The background image for the login page is from [Nardack - Pixiv](https://www.pixiv.net/artworks/89657320). **Modification and distribution without the permission of the author is prohibited**.
 
 ## License
 
