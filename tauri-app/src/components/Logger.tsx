@@ -85,7 +85,7 @@ const Log = (props: {
 			<span class="max-w-sm break-words select-text">{message}</span>
 			<button
 				type="button"
-				class="ml-2 focus:outline-none"
+				class="bg-transparent ml-2 focus:outline-none"
 				onClick={merged.onRemove}
 			>
 				<Icon icon={faXmark} />
