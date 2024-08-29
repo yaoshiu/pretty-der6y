@@ -37,7 +37,11 @@ export default function Main() {
 		invoke("get_daily_limit")
 			.then(setDaily)
 			.catch((error) => {
-				logger?.error(error as string);
+				if (typeof error === "string") {
+					logger?.error(error);
+				} else if (error instanceof Error) {
+					logger?.error(error.message);
+				}
 			});
 	});
 

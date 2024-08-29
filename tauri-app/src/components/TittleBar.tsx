@@ -29,7 +29,11 @@ export const TittleBar = () => {
 		try {
 			appWindow = getCurrentWindow();
 		} catch (error) {
-			logger?.error(error as string);
+			if (typeof error === "string") {
+				logger?.error(error);
+			} else if (error instanceof Error) {
+				logger?.error(error.message);
+			}
 		}
 	});
 
