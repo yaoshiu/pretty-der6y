@@ -15,10 +15,9 @@
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@tauri-apps/api": "^2.0.0-rc.4",
-    "@tauri-apps/plugin-updater": "^2.0.0-rc.0",
+    "@tauri-apps/plugin-updater": "^2.0.0-rc.1",
     "@types/geojson": "^7946.0.14",
     "@types/leaflet": "^1.9.12",
-    "@unocss/reset": "^0.62.3",
     "@unocss/reset": "^0.62.3",
     "leaflet": "^1.9.4",
     "solid-js": "^1.8.22"
@@ -29,7 +28,6 @@
     "globals": "^15.9.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
-    "unocss": "^0.62.3",
     "unocss": "^0.62.3",
     "vite": "^5.4.2",
     "vite-plugin-solid": "^2.10.2"
