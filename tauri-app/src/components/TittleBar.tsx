@@ -29,11 +29,8 @@ export const TittleBar = () => {
     try {
       appWindow = getCurrentWindow();
     } catch (error) {
-      if (typeof error === "string") {
-        logger?.error(error);
-      } else if (error instanceof Error) {
-        logger?.error(error.message);
-      }
+      const message = error instanceof Error ? error.message : error;
+      logger?.error(`Error getting current window: ${message}`);
     }
   });
 

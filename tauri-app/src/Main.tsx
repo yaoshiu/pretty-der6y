@@ -37,11 +37,8 @@ export default function Main() {
     invoke("get_daily_limit")
       .then(setDaily)
       .catch((error) => {
-        if (typeof error === "string") {
-          logger?.error(error);
-        } else if (error instanceof Error) {
-          logger?.error(error.message);
-        }
+        const message = error instanceof Error ? error.message : error;
+        logger?.error(`Error getting daily limit: ${message}`);
       });
   });
 
@@ -94,7 +91,7 @@ export default function Main() {
             onSubmit={(event) => {
               event.preventDefault();
               if (!file()) {
-                logger?.error("No file selected!");
+                logger?.warn("No file selected!");
                 return;
               }
               setPending(true);
@@ -111,8 +108,8 @@ export default function Main() {
                     .then(() => {
                       logger?.info("Upload successful!");
                     })
-                    .catch((e) => {
-                      logger?.error(e.toString());
+                    .catch((error) => {
+                      logger?.error(`Error uploading: ${error}`);
                     })
                     .finally(() => setPending(false));
                 } else {
