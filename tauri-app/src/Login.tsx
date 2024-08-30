@@ -37,8 +37,8 @@ export default function Login() {
               setPending(true);
               invoke("login", { username: username(), password: password() })
                 .then(() => setLogined(true))
-                .catch((e) => {
-                  logger?.error(e);
+                .catch((error) => {
+                  logger?.error(`Error logging in: ${error}`);
                 })
                 .finally(() => setPending(false));
             }}
