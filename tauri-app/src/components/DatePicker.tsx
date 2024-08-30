@@ -34,7 +34,7 @@ const DatePicker = (props: { date: Signal<Date> }) => {
         onClick={() => {
           setDate(props.date);
         }}
-        class="px-2 hover:text-indigo-500"
+        class="px-2 bg-transparent hover:text-indigo-500"
         classList={{
           "pr-4": decrease(),
           "pl-4": !decrease(),
@@ -76,7 +76,7 @@ const DatePicker = (props: { date: Signal<Date> }) => {
           type="button"
           tabindex="-1"
           onClick={() => setPage(props.type)}
-          class="py-1 text-sm px-2 rounded-lg hover:bg-gray-500/50"
+          class="py-1 bg-transparent text-sm px-2 rounded-lg hover:bg-gray-500/50"
         >
           {props.type === "year"
             ? date().getFullYear()
@@ -132,6 +132,7 @@ const DatePicker = (props: { date: Signal<Date> }) => {
                     "text-gray-400": day.getMonth() !== date().getMonth(),
                     "hover:bg-gray-500/50": !current(),
                     "bg-indigo-500 text-white": current(),
+                    "bg-transparent": !current(),
                   }}
                 >
                   {day.getDate()}
