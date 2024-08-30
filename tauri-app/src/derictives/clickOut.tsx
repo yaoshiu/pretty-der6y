@@ -33,23 +33,23 @@ import { onCleanup, type Accessor } from "solid-js";
  * ```
  */
 export default function clickOut(
-  el: HTMLElement,
-  value: Accessor<(event: MouseEvent) => void>
+	el: HTMLElement,
+	value: Accessor<(event: MouseEvent) => void>,
 ) {
-  function onClick(event: MouseEvent) {
-    if (el.contains(event.target as HTMLElement)) return;
-    value()?.(event);
-  }
+	function onClick(event: MouseEvent) {
+		if (el.contains(event.target as HTMLElement)) return;
+		value()?.(event);
+	}
 
-  document.body.addEventListener("click", onClick);
+	document.body.addEventListener("click", onClick);
 
-  onCleanup(() => document.body.removeEventListener("click", onClick));
+	onCleanup(() => document.body.removeEventListener("click", onClick));
 }
 
 declare module "solid-js" {
-  namespace JSX {
-    interface Directives {
-      clickOut: (event: MouseEvent) => void;
-    }
-  }
+	namespace JSX {
+		interface Directives {
+			clickOut: (event: MouseEvent) => void;
+		}
+	}
 }
