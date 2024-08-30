@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 export const LeafletMap = (
   props: JSX.HTMLAttributes<HTMLDivElement> & {
     map: Signal<L.Map | undefined>;
-  }
+  },
 ) => {
   const [local, others] = splitProps(props, ["ref", "map"]);
   const [, setMap] = local.map;

@@ -13,13 +13,13 @@ export const Input = (
   props: JSX.InputHTMLAttributes<HTMLInputElement> & {
     prefixContent?: JSX.Element;
     suffixContent?: JSX.Element;
-  }
+  },
 ) => {
   const merged = mergeProps(
     {
       type: "text",
     },
-    props
+    props,
   );
 
   const [local, others] = splitProps(merged, [

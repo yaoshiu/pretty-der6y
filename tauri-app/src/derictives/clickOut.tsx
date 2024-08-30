@@ -34,7 +34,7 @@ import { onCleanup, type Accessor } from "solid-js";
  */
 export default function clickOut(
   el: HTMLElement,
-  value: Accessor<(event: MouseEvent) => void>
+  value: Accessor<(event: MouseEvent) => void>,
 ) {
   function onClick(event: MouseEvent) {
     if (el.contains(event.target as HTMLElement)) return;

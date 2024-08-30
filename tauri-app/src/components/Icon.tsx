@@ -16,7 +16,7 @@ import { type JSX, splitProps } from "solid-js";
 export const Icon = (
   props: JSX.HTMLAttributes<HTMLSpanElement> & {
     icon: IconName | IconLookup;
-  }
+  },
 ) => {
   const [local, others] = splitProps(props, ["icon"]);
   const iconHTML = icon(local.icon).html[0];

@@ -14,7 +14,7 @@ const Slider = (props: {
       minimum: 0,
       maximum: 100,
     },
-    props
+    props,
   );
 
   const [value, setValue] = merged.value;
