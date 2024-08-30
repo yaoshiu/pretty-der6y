@@ -21,9 +21,25 @@ export const LeafletMap = (
       (position) => {
         map.setView([position.coords.latitude, position.coords.longitude], 13);
       },
-      (error) => {
-        logger?.error(`Error getting location: ${error.message}`);
-        map.setView([51.505, -0.09], 13);
+      async (error) => {
+        // This can be annoying. Maybe we should just remove it.
+        logger?.warn(
+          `Error getting location: ${error.message}, falling back to IP location`,
+        );
+
+        const response = await fetch("https://ipapi.co/json/");
+        if (response.ok) {
+          const data = await response.json();
+
+          const { latitude, longitude } = data;
+
+          map.setView([latitude, longitude], 13);
+        } else {
+          logger?.error(
+            `Error getting location: ${response.statusText}, falling back to default location`,
+          );
+          map.setView([51.505, -0.09], 13);
+        }
       },
     );
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
