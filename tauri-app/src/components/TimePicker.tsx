@@ -76,6 +76,7 @@ export const TimePicker = (props: { time: Signal<Date> }) => {
         tabindex="-1"
         classList={{
           "bg-gray-300": same(),
+          "bg-transparent": !same(),
           "text-indigo-500": same(),
         }}
         onClick={handleClick}
