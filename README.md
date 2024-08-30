@@ -54,13 +54,29 @@ Check our example route file [here](./assets/map.geojson).
 
 ## Credits
 
-Special thanks to:
+**Special Thanks to:**
 
-- The [Tauri](tauri.app) toolkit.
-
-- The [Solid](solidjs.com) framework.
-
-- The [TailwindCSS](tailwindcss.com).
+- **[Tauri](https://tauri.app):** For their robust framework that empowers Rust-based frontend development, enabling fast and secure desktop apps.
+  
+- **[Solid](https://solidjs.com):** For their efficient reactive UI library that boosted our frontend performance.
+  
+- **[UnoCSS](https://unocss.dev):** For their utility-first CSS framework, simplifying our styling process.
+  
+- **[Vite](https://vitejs.dev):** For their fast and optimized frontend build tool that streamlined our development workflow.
+  
+- **[Leaflet](https://leafletjs.com):** For their versatile library that made working with interactive maps a breeze.
+  
+- **[Font Awesome](https://fontawesome.com):** For their comprehensive icon toolkit that enhanced our UI design.
+  
+- **[Chrono](https://github.com/chronotope/chrono):** For their reliable Rust library for handling date and time.
+  
+- **[Serde](https://serde.rs):** For their efficient serialization framework in Rust.
+  
+- **[ipapi](https://ipapi.co):** For their dependable IP geolocation API, enriching our application with accurate location data.
+  
+- **[GeoRust](https://georust.org):** For their essential geospatial tools in Rust.
+  
+- **[Reqwest](https://docs.rs/reqwest):** For their easy-to-use HTTP client for Rust, simplifying our API interactions.
 
 The background image for the login page is from [Nardack - Pixiv](https://www.pixiv.net/artworks/89657320). **Modification and distribution without the permission of the author is prohibited**.
 
