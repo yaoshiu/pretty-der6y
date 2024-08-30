@@ -1,6 +1,6 @@
 import { createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import DatePicker from "./components/DatePicker";
-import LeafletMap from "./components/Map";
+import LeafletMap from "./components/LeafletMap";
 import TwoColumn from "./layouts/TwoColumn";
 import TimePicker from "./components/TimePicker";
 import Slider from "./components/Slider";
@@ -156,4 +156,3 @@ export default function Main() {
     />
   );
 }
-        
