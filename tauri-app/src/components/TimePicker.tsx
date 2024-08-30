@@ -1,12 +1,12 @@
 import {
-	createEffect,
-	createMemo,
-	createSignal,
-	For,
-	onMount,
-	Show,
-	type ParentComponent,
-	type Signal,
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  onMount,
+  Show,
+  type ParentComponent,
+  type Signal,
 } from "solid-js";
 import Input from "./Input";
 import Icon from "./Icon";
@@ -18,179 +18,179 @@ import Scrollbar from "./Scrollbar";
 clickOut; // avoid unused import warning
 
 export const TimePicker = (props: { time: Signal<Date> }) => {
-	const [time, setTime] = props.time;
-	const [show, setShow] = createSignal(false);
+  const [time, setTime] = props.time;
+  const [show, setShow] = createSignal(false);
 
-	const value = createMemo(() => {
-		const offset = time().getTimezoneOffset() * 60 * 1000;
-		return new Date(time().getTime() - offset).toISOString().slice(11, 19);
-	});
+  const value = createMemo(() => {
+    const offset = time().getTimezoneOffset() * 60 * 1000;
+    return new Date(time().getTime() - offset).toISOString().slice(11, 19);
+  });
 
-	const TimeButton: ParentComponent<{
-		hour?: number;
-		minute?: number;
-		second?: number;
-	}> = (props) => {
-		const same = createMemo(
-			() =>
-				time().getHours() === (props.hour ?? time().getHours()) &&
-				time().getMinutes() === (props.minute ?? time().getMinutes()) &&
-				time().getSeconds() === (props.second ?? time().getSeconds()),
-		);
+  const TimeButton: ParentComponent<{
+    hour?: number;
+    minute?: number;
+    second?: number;
+  }> = (props) => {
+    const same = createMemo(
+      () =>
+        time().getHours() === (props.hour ?? time().getHours()) &&
+        time().getMinutes() === (props.minute ?? time().getMinutes()) &&
+        time().getSeconds() === (props.second ?? time().getSeconds()),
+    );
 
-		let self!: HTMLButtonElement;
+    let self!: HTMLButtonElement;
 
-		function scrollToCenter(behavior: ScrollBehavior) {
-			// Dirty trick the get the scrollable parent
-			// Not a good practice, but it works, for now
-			if (!self.parentElement) return;
-			const parent = self.parentElement;
+    function scrollToCenter(behavior: ScrollBehavior) {
+      // Dirty trick the get the scrollable parent
+      // Not a good practice, but it works, for now
+      if (!self.parentElement) return;
+      const parent = self.parentElement;
 
-			const scrollHeight = parent.clientHeight;
-			const selfHeight = self.clientHeight;
+      const scrollHeight = parent.clientHeight;
+      const selfHeight = self.clientHeight;
 
-			const scrollTop = self.offsetTop - (scrollHeight - selfHeight) / 2;
+      const scrollTop = self.offsetTop - (scrollHeight - selfHeight) / 2;
 
-			parent.scrollTo({ top: scrollTop, behavior });
-		}
+      parent.scrollTo({ top: scrollTop, behavior });
+    }
 
-		onMount(() => {
-			if (same()) {
-				scrollToCenter("instant");
-			}
-			createEffect(() => same() && scrollToCenter("smooth"));
-		});
+    onMount(() => {
+      if (same()) {
+        scrollToCenter("instant");
+      }
+      createEffect(() => same() && scrollToCenter("smooth"));
+    });
 
-		function handleClick() {
-			const newDate = new Date(time());
-			newDate.setHours(props.hour ?? time().getHours());
-			newDate.setMinutes(props.minute ?? time().getMinutes());
-			newDate.setSeconds(props.second ?? time().getSeconds());
-			setTime(newDate);
-		}
+    function handleClick() {
+      const newDate = new Date(time());
+      newDate.setHours(props.hour ?? time().getHours());
+      newDate.setMinutes(props.minute ?? time().getMinutes());
+      newDate.setSeconds(props.second ?? time().getSeconds());
+      setTime(newDate);
+    }
 
-		return (
-			<button
-				type="button"
-				class="block rounded-lg text-center w-12 p-1 my-1 hover:bg-gray-300"
-				tabindex="-1"
-				classList={{
-					"bg-gray-300": same(),
-					"text-indigo-500": same(),
-				}}
-				onClick={handleClick}
-				ref={self}
-			>
-				{props.children}
-			</button>
-		);
-	};
+    return (
+      <button
+        type="button"
+        class="block rounded-lg text-center w-12 p-1 my-1 hover:bg-gray-300"
+        tabindex="-1"
+        classList={{
+          "bg-gray-300": same(),
+          "text-indigo-500": same(),
+        }}
+        onClick={handleClick}
+        ref={self}
+      >
+        {props.children}
+      </button>
+    );
+  };
 
-	let ref!: HTMLDivElement;
+  let ref!: HTMLDivElement;
 
-	return (
-		<div class="relative" use:clickOut={() => setShow(false)} ref={ref}>
-			<Input
-				type="text"
-				value={value()}
-				pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
-				onInput={(event) => {
-					const input = event.target.value;
-					if (/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(input)) {
-						const [hour, minute, second] = input.split(":").map(Number);
-						setTime((prev) => {
-							const date = new Date(prev);
-							date.setHours(hour);
-							date.setMinutes(minute);
-							date.setSeconds(second);
-							return date;
-						});
-					}
-				}}
-				onFocus={() => setShow(true)}
-				onFocusOut={(event) => {
-					if (
-						event.relatedTarget &&
-						!ref.contains(event.relatedTarget as HTMLElement)
-					) {
-						setShow(false);
-					}
-				}}
-				placeholder="HH:MM"
-				suffixContent={<Icon icon={faClock} class="text-gray-400" />}
-			/>
-			<Show when={show()}>
-				<Popover>
-					<div class="px-2">
-						<div class="flex h-48 space-x-1 justify-between">
-							<Scrollbar>
-								<For each={[...Array(24).keys()]}>
-									{(hour) => {
-										const newDate = new Date(time());
-										newDate.setHours(hour);
+  return (
+    <div class="relative" use:clickOut={() => setShow(false)} ref={ref}>
+      <Input
+        type="text"
+        value={value()}
+        pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+        onInput={(event) => {
+          const input = event.target.value;
+          if (/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(input)) {
+            const [hour, minute, second] = input.split(":").map(Number);
+            setTime((prev) => {
+              const date = new Date(prev);
+              date.setHours(hour);
+              date.setMinutes(minute);
+              date.setSeconds(second);
+              return date;
+            });
+          }
+        }}
+        onFocus={() => setShow(true)}
+        onFocusOut={(event) => {
+          if (
+            event.relatedTarget &&
+            !ref.contains(event.relatedTarget as HTMLElement)
+          ) {
+            setShow(false);
+          }
+        }}
+        placeholder="HH:MM"
+        suffixContent={<Icon icon={faClock} class="text-gray-400" />}
+      />
+      <Show when={show()}>
+        <Popover>
+          <div class="px-2">
+            <div class="flex h-48 space-x-1 justify-between">
+              <Scrollbar>
+                <For each={[...Array(24).keys()]}>
+                  {(hour) => {
+                    const newDate = new Date(time());
+                    newDate.setHours(hour);
 
-										return (
-											<TimeButton hour={hour}>
-												{hour.toString().padStart(2, "0")}
-											</TimeButton>
-										);
-									}}
-								</For>
-							</Scrollbar>
-							<Scrollbar>
-								<For each={[...Array(60).keys()]}>
-									{(minute) => {
-										const newDate = new Date(time());
-										newDate.setMinutes(minute);
+                    return (
+                      <TimeButton hour={hour}>
+                        {hour.toString().padStart(2, "0")}
+                      </TimeButton>
+                    );
+                  }}
+                </For>
+              </Scrollbar>
+              <Scrollbar>
+                <For each={[...Array(60).keys()]}>
+                  {(minute) => {
+                    const newDate = new Date(time());
+                    newDate.setMinutes(minute);
 
-										return (
-											<TimeButton minute={minute}>
-												{minute.toString().padStart(2, "0")}
-											</TimeButton>
-										);
-									}}
-								</For>
-							</Scrollbar>
-							<Scrollbar>
-								<For each={[...Array(60).keys()]}>
-									{(second) => {
-										const newDate = new Date(time());
-										newDate.setSeconds(second);
+                    return (
+                      <TimeButton minute={minute}>
+                        {minute.toString().padStart(2, "0")}
+                      </TimeButton>
+                    );
+                  }}
+                </For>
+              </Scrollbar>
+              <Scrollbar>
+                <For each={[...Array(60).keys()]}>
+                  {(second) => {
+                    const newDate = new Date(time());
+                    newDate.setSeconds(second);
 
-										return (
-											<TimeButton second={second}>
-												{second.toString().padStart(2, "0")}
-											</TimeButton>
-										);
-									}}
-								</For>
-							</Scrollbar>
-						</div>
-						<div class="flex justify-between py-1 border-t border-gray-300">
-							<button
-								type="button"
-								class="rounded-lg px-2 py-1 border border-gray-300 hover:bg-gray-300"
-								onClick={() => {
-									setTime(new Date());
-								}}
-							>
-								Now
-							</button>
-							<button
-								type="button"
-								class="rounded-lg px-2 py-1 border border-gray-300 hover:bg-gray-300"
-								onClick={() => {
-									setShow(false);
-								}}
-							>
-								OK
-							</button>
-						</div>
-					</div>
-				</Popover>
-			</Show>
-		</div>
-	);
+                    return (
+                      <TimeButton second={second}>
+                        {second.toString().padStart(2, "0")}
+                      </TimeButton>
+                    );
+                  }}
+                </For>
+              </Scrollbar>
+            </div>
+            <div class="flex justify-between py-1 border-t border-gray-300">
+              <button
+                type="button"
+                class="rounded-lg px-2 py-1 border border-gray-300 hover:bg-gray-300"
+                onClick={() => {
+                  setTime(new Date());
+                }}
+              >
+                Now
+              </button>
+              <button
+                type="button"
+                class="rounded-lg px-2 py-1 border border-gray-300 hover:bg-gray-300"
+                onClick={() => {
+                  setShow(false);
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </Popover>
+      </Show>
+    </div>
+  );
 };
 
 export default TimePicker;
