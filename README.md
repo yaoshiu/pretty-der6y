@@ -78,12 +78,27 @@ Check our example route file [here](./assets/map.geojson).
   
 - **[Reqwest](https://docs.rs/reqwest):** For their easy-to-use HTTP client for Rust, simplifying our API interactions.
 
-The background image for the login page is from [Nardack - Pixiv](https://www.pixiv.net/artworks/89657320). **Modification and distribution without the permission of the author is prohibited**.
+The background image for the login page is from [Nardack - Pixiv](https://www.pixiv.net/artworks/89657320).
+**Modification and distribution without the permission of the author is prohibited**.
 
 ## License
 
-This project is licensed under the AGPL-3.0 License.
+```text
+    Pretty Der6y - A third-party running data upload client.
+    Copyright (C) 2024  Fay Ash
 
-You can modify and redistribute this software freely, but make sure the source code is available to public.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+```
 
 See the [LICENSE](./LICENSE) file for details.
