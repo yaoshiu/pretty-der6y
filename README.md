@@ -48,7 +48,7 @@ bun tauri build
 
 The route file is in [GEOJSON](geojson.org) format. Route files for _Pretty Der6y_ should contain exactly **ONE** feature with a **SINGLE** `LineString`.
 
-You can create your route in [geojson.io](geojson.io).
+You can create your route in [geojson.io](https://geojson.io).
 
 Check our example route file [here](./assets/map.geojson).
 
