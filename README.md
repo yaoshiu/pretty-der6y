@@ -20,7 +20,7 @@ You can find the latest release [here](https://github.com/yaoshiu/pretty-der6y/r
 
 You can build the project from source by the following steps.
 
-#### Prerequistes
+#### Prerequisites
 
 - Rust toolchain including `rustc` and `cargo`.
 - A JavaScript runtime ([bun](bun.sh) recommended).
@@ -48,7 +48,7 @@ bun tauri build
 
 The route file is in [GEOJSON](geojson.org) format. Route files for _Pretty Der6y_ should contain exactly **ONE** feature with a **SINGLE** `LineString`.
 
-You can create your route in [georoute.io](georoute.io).
+You can create your route in [geojson.io](geojson.io).
 
 Check our example route file [here](./assets/map.geojson).
 
