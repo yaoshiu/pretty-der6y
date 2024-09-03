@@ -17,8 +17,9 @@
 */
 
 import {
-  type IconName,
   type IconLookup,
+  type IconName,
+  type IconParams,
   icon,
 } from "@fortawesome/fontawesome-svg-core";
 import { type JSX, splitProps } from "solid-js";
@@ -32,14 +33,14 @@ import { type JSX, splitProps } from "solid-js";
  * @returns {JSX.Element} The rendered icon component.
  */
 export const Icon = (
-  props: JSX.HTMLAttributes<HTMLSpanElement> & {
+  props: IconParams & {
     icon: IconName | IconLookup;
   },
-) => {
+): JSX.Element => {
   const [local, others] = splitProps(props, ["icon"]);
-  const iconHTML = icon(local.icon).html[0];
+  const iconNode = icon(local.icon, others).node[0];
 
-  return <span {...others} innerHTML={iconHTML} />;
+  return iconNode;
 };
 
 export default Icon;

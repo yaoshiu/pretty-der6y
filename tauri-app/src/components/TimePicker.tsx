@@ -136,7 +136,7 @@ export const TimePicker = (props: { time: Signal<Date> }) => {
           }
         }}
         placeholder="HH:MM"
-        suffixContent={<Icon icon={faClock} class="text-gray-400" />}
+        suffixContent={<Icon icon={faClock} classes="text-gray-400" />}
       />
       <Show when={show()}>
         <Popover>

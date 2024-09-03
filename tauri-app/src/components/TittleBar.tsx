@@ -58,10 +58,10 @@ export const TittleBar = () => {
       class="h-8 flex justify-end fixed top-0 left-0 right-0 z-[500]"
     >
       <TittleButton onClick={() => appWindow?.minimize()}>
-        <Icon icon={faMinus} class="transition-all hover:drop-shadow-lg" />
+        <Icon icon={faMinus} classes="transition-all hover:drop-shadow-lg" />
       </TittleButton>
       <TittleButton onClick={() => appWindow?.close()}>
-        <Icon icon={faXmark} class="transition-all hover:drop-shadow-lg" />
+        <Icon icon={faXmark} classes="transition-all hover:drop-shadow-lg" />
       </TittleButton>
     </div>
   );

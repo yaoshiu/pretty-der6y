@@ -99,7 +99,7 @@ const Log = (props: {
         "transition-duration": `${merged.duration}ms`,
       }}
     >
-      <Icon class="mr-2" icon={levelIcons[level]} />
+      <Icon classes="mr-2" icon={levelIcons[level]} />
       <span class="max-w-sm break-words select-text">{message}</span>
       <button
         type="button"
