@@ -76,7 +76,7 @@ export default function Login() {
                 setUsername(event.target.value);
                 event.currentTarget.setCustomValidity("");
               }}
-              prefixContent={<Icon icon={faUser} class="text-gray-400" />}
+              prefixContent={<Icon icon={faUser} classes="text-gray-400" />}
             />
             <Input
               name="password"
@@ -92,7 +92,7 @@ export default function Login() {
                 setPassword(event.target.value);
                 event.currentTarget.setCustomValidity("");
               }}
-              prefixContent={<Icon icon={faLock} class="text-gray-400" />}
+              prefixContent={<Icon icon={faLock} classes="text-gray-400" />}
             />
             <Button type="submit" disabled={pending()}>
               Login

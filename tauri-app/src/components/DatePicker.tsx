@@ -300,7 +300,7 @@ const DatePicker = (props: { date: Signal<Date> }) => {
           }
         }}
         placeholder="YYYY-MM-DD"
-        suffixContent={<Icon icon={faCalendar} class="text-gray-400" />}
+        suffixContent={<Icon icon={faCalendar} classes="text-gray-400" />}
       />
 
       <Show when={show()}>
