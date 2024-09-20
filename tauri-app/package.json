@@ -14,22 +14,22 @@
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
-    "@tauri-apps/api": "^2.0.0-rc.4",
-    "@tauri-apps/plugin-updater": "^2.0.0-rc.1",
+    "@tauri-apps/api": "^2.0.0-rc.5",
+    "@tauri-apps/plugin-updater": "^2.0.0-rc.2",
     "@types/geojson": "^7946.0.14",
     "@types/leaflet": "^1.9.12",
-    "@unocss/reset": "^0.62.3",
+    "@unocss/reset": "^0.62.4",
     "leaflet": "^1.9.4",
     "solid-js": "^1.8.22"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
-    "@tauri-apps/cli": "^2.0.0-rc.8",
+    "@tauri-apps/cli": "^2.0.0-rc.16",
     "globals": "^15.9.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4",
-    "unocss": "^0.62.3",
-    "vite": "^5.4.2",
+    "typescript": "^5.6.2",
+    "unocss": "^0.62.4",
+    "vite": "^5.4.7",
     "vite-plugin-solid": "^2.10.2"
   }
 }
