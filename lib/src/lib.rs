@@ -1,5 +1,5 @@
 /*
-* Pretty Der6y - A third-party running data upload client.
+    Pretty Der6y - A third-party running data upload client.
     Copyright (C) 2024  Fay Ash
 
     This program is free software: you can redistribute it and/or modify
@@ -17,23 +17,34 @@
 */
 
 mod routine;
+mod security;
+use const_format::formatcp;
 use log::{debug, info};
+use regex::Regex;
 use routine::*;
 
-use chrono::{DateTime, Duration, Local};
+use chrono::{DateTime, Duration, Local, Utc};
 use rand::{thread_rng, Rng};
 use reqwest::{header::*, Client, StatusCode};
-use serde::Deserialize;
+use security::{decode_ns, sign_run_data, UploadRunningInfoBuilder};
+use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sha1::{digest::FixedOutputReset, Digest, Sha1};
 use std::{collections::HashMap, error::Error};
 
-const URL_CURRENT: &str = "https://cpes.legym.cn/education/semester/getCurrent";
-const URL_GETRUNNINGLIMIT: &str = "https://cpes.legym.cn/running/app/getRunningLimit";
-const URL_GETVERSION: &str =
-    "https://cpes.legym.cn/authorization/mobileApp/getLastVersion?platform=2";
-const URL_LOGIN: &str = "https://cpes.legym.cn/authorization/user/manage/login";
-const URL_UPLOADRUNNING: &str = "https://cpes.legym.cn/running/app/v2/uploadRunningDetails";
+const URL_BASE: &str = env!("BACKEND");
+
+const URL_CURRENT: &str = formatcp!("https://{}/education/semester/getCurrent", URL_BASE);
+
+const URL_GETRUNNINGLIMIT: &str = formatcp!("https://{}/running/app/getRunningLimit", URL_BASE);
+
+const URL_GETVERSION: &str = formatcp!(
+    "https://{}/authorization/mobileApp/getLastVersion?platform=2",
+    URL_BASE
+);
+
+const URL_LOGIN: &str = formatcp!("https://{}/authorization/user/v2/manage/login", URL_BASE);
+
+const URL_UPLOADRUNNING: &str = formatcp!("https://{}/running//app/v3/upload", URL_BASE);
 
 const ORGANIZATION: HeaderName = HeaderName::from_static("organization");
 
@@ -44,14 +55,20 @@ const HEADERS: [(HeaderName, &str); 9] = [
     (AUTHORIZATION, ""),
     (CONNECTION, "keep-alive"),
     (CONTENT_TYPE, "application/json"),
-    (HOST, "cpes.legym.cn"),
+    (HOST, URL_BASE),
     (ORGANIZATION, ""),
     (USER_AGENT, "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OSX) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Html15Plus/1.0 (Immersed/47) uni-app"),
 ];
 
 const CALORIE_PER_MILEAGE: f64 = 58.3;
 const PACE: f64 = 360.;
-const SALT: &str = "itauVfnexHiRigZ6";
+
+fn format_json<T: Serialize>(json: T) -> Result<String, Box<dyn Error>> {
+    let re = Regex::new(": ")?;
+    let json = serde_json::to_string_pretty(&json)?;
+
+    Ok(re.replace_all(&json, " : ").to_string())
+}
 
 #[derive(Clone, Default)]
 pub struct Account {
@@ -59,12 +76,11 @@ pub struct Account {
     daily: f64,
     day: f64,
     end: f64,
-    hasher: Sha1,
     headers: HeaderMap,
     id: String,
+    school_id: String,
     limitation: String,
-    organization: String,
-    scoring: i64,
+    scoring: u8,
     semester: String,
     start: f64,
     token: String,
@@ -80,24 +96,12 @@ impl Account {
         for (key, val) in HEADERS {
             headers.insert(key, val.parse().unwrap());
         }
-        Self {
-            client: Client::new(),
-            daily: 0.,
-            day: 0.,
-            end: 0.,
-            hasher: Sha1::new(),
-            headers,
-            id: String::new(),
-            limitation: String::new(),
-            organization: String::new(),
-            scoring: 0,
-            semester: String::new(),
-            start: 0.,
-            token: String::new(),
-            version: String::new(),
-            week: 0.,
-            weekly: 0.,
-        }
+
+        let mut new = Self::default();
+
+        new.headers = headers;
+
+        new
     }
 
     pub async fn login(&mut self, username: &str, password: &str) -> Result<(), Box<dyn Error>> {
@@ -109,25 +113,44 @@ impl Account {
     }
 
     async fn set_token(&mut self, username: &str, password: &str) -> Result<(), Box<dyn Error>> {
-        let signdigital = {
-            self.hasher
-                .update((username.to_string() + password + "1" + SALT).as_bytes());
-            hex::encode(self.hasher.finalize_fixed_reset())
-        };
-        let json = json!({
-            "entrance": "1",
-            "password": &password.to_string(),
-            "signDigital": &signdigital.to_string(),
-            "userName": &username.to_string(),
-        });
+        let signdigital = security::hs(&format!("{}{}1", username, password));
 
-        debug!("Login json: {:#?}", json);
+        #[derive(Serialize)]
+        #[serde(rename_all = "camelCase")]
+        struct LoginRequest {
+            entrance: String,
+            user_name: String,
+            password: String,
+            sign_digital: String,
+        }
+
+        let request = LoginRequest {
+            entrance: "1".to_string(),
+            user_name: username.to_string(),
+            password: password.to_string(),
+            sign_digital: signdigital.to_string(),
+        };
+
+        let json = format_json(request)?;
+
+        debug!("Login json: {}", json);
+
+        let t = Utc::now().timestamp_millis();
+        let encode_ns = security::encode_ns(&json, t)?;
+
+        #[derive(Serialize, Deserialize, Debug)]
+        struct SecurityBody {
+            t: i64,
+            pyd: String,
+        }
+
+        let request = SecurityBody { t, pyd: encode_ns };
 
         let res = self
             .client
             .post(URL_LOGIN)
             .headers(self.headers.clone())
-            .json(&json)
+            .json(&request)
             .send()
             .await?;
 
@@ -135,33 +158,35 @@ impl Account {
             return Err("Invalid account or password".into());
         }
 
-        let res = res.error_for_status()?;
-        debug!("Login response: {:#?}", res);
+        let res = res.error_for_status()?.text().await?;
+        debug!("Login response: {}", res);
 
         #[derive(Deserialize, Debug)]
-        #[allow(non_snake_case)]
-        struct LoginData {
-            id: String,
-            accessToken: String,
-            campusId: String,
+        #[serde(rename_all = "camelCase")]
+        struct SecurityResponse {
+            data: SecurityBody,
         }
+
+        let data = serde_json::from_str::<SecurityResponse>(&res)?.data;
+
+        let data = decode_ns(&data.pyd, data.t)?;
 
         #[derive(Deserialize)]
-        struct LoginResult {
-            data: LoginData,
+        #[serde(rename_all = "camelCase")]
+        struct TokenData {
+            id: String,
+            organization_id: String,
+            access_token: String,
+            school_id: String,
         }
 
-        let data = res
-            .json::<LoginResult>()
-            .await
-            .or(Err("Login failed"))?
-            .data;
+        let data: TokenData = serde_json::from_str(&data)?;
 
         self.id = data.id;
-        self.token = data.accessToken;
-        self.organization = data.campusId;
+        self.token = data.access_token;
+        self.school_id = data.school_id;
         self.headers
-            .insert(ORGANIZATION, self.organization.parse()?);
+            .insert(ORGANIZATION, data.organization_id.parse()?);
         self.headers
             .insert(AUTHORIZATION, format!("Bearer {}", self.token).parse()?);
 
@@ -176,10 +201,13 @@ impl Account {
             .headers(self.headers.clone())
             .send()
             .await?
-            .error_for_status()?;
+            .error_for_status()?
+            .text()
+            .await?;
+
+        debug!("Current response: {}", res);
 
         #[derive(Deserialize, Debug)]
-        #[allow(non_snake_case)]
         struct CurrentData {
             id: String,
         }
@@ -189,12 +217,9 @@ impl Account {
             data: Option<CurrentData>,
         }
 
-        debug!("Current response: {:#?}", res);
-        let data = res
-            .json::<CurrentResult>()
-            .await?
+        let data = serde_json::from_str::<CurrentResult>(&res)?
             .data
-            .ok_or("Semester not started yet.")?;
+            .ok_or("No current semester")?;
 
         self.semester = data.id;
 
@@ -209,22 +234,24 @@ impl Account {
             .headers(self.headers.clone())
             .send()
             .await?
-            .error_for_status()?;
+            .error_for_status()?
+            .text()
+            .await?;
 
-        debug!("Version response: {:#?}", res);
+        debug!("Version response: {}", res);
         #[derive(Deserialize, Debug)]
-        #[allow(non_snake_case)]
+        #[serde(rename_all = "camelCase")]
         struct VersionData {
-            versionLabel: String,
+            version_label: String,
         }
 
         #[derive(Deserialize)]
         struct VersionResult {
             data: VersionData,
         }
-        let data = res.json::<VersionResult>().await?.data;
+        let data = serde_json::from_str::<VersionResult>(&res)?.data;
 
-        self.version = data.versionLabel;
+        self.version = data.version_label;
 
         info!("Get version successful!");
         Ok(())
@@ -234,7 +261,6 @@ impl Account {
         let json = json!({
             "semesterId": self.semester,
         });
-        debug!("Running limits json: {:#?}", json);
 
         let res = self
             .client
@@ -243,19 +269,23 @@ impl Account {
             .json(&json)
             .send()
             .await?
-            .error_for_status()?;
+            .error_for_status()?
+            .text()
+            .await?;
+
+        debug!("Running limits response: {}", res);
 
         #[derive(Deserialize, Debug)]
-        #[allow(non_snake_case)]
+        #[serde(rename_all = "camelCase")]
         struct RunningLimitsData {
-            dailyMileage: Option<f64>,
-            effectiveMileageEnd: Option<f64>,
-            effectiveMileageStart: Option<f64>,
-            limitationsGoalsSexInfoId: Option<String>,
-            scoringType: Option<i64>,
-            totalDayMileage: Option<String>,
-            totalWeekMileage: Option<String>,
-            weeklyMileage: Option<f64>,
+            daily_mileage: Option<f64>,
+            effective_mileage_end: Option<f64>,
+            effective_mileage_start: Option<f64>,
+            limitations_goals_sex_info_id: Option<String>,
+            scoring_type: Option<u8>,
+            total_day_mileage: Option<String>,
+            total_week_mileage: Option<String>,
+            weekly_mileage: Option<f64>,
         }
 
         #[derive(Deserialize)]
@@ -263,8 +293,7 @@ impl Account {
             data: RunningLimitsData,
         }
 
-        debug!("Running limits response: {:#?}", res);
-        let data = res.json::<RunningLimitsResult>().await?.data;
+        let data = serde_json::from_str::<RunningLimitsResult>(&res)?.data;
 
         if let (
             Some(daily_mileage),
@@ -276,14 +305,14 @@ impl Account {
             Some(total_week_mileage),
             Some(weekly_mileage),
         ) = (
-            data.dailyMileage,
-            data.effectiveMileageEnd,
-            data.effectiveMileageStart,
-            data.limitationsGoalsSexInfoId,
-            data.scoringType,
-            data.totalDayMileage,
-            data.totalWeekMileage,
-            data.weeklyMileage,
+            data.daily_mileage,
+            data.effective_mileage_end,
+            data.effective_mileage_start,
+            data.limitations_goals_sex_info_id,
+            data.scoring_type,
+            data.total_day_mileage,
+            data.total_week_mileage,
+            data.weekly_mileage,
         ) {
             self.daily = daily_mileage;
             self.day = total_day_mileage.parse()?;
@@ -311,25 +340,28 @@ impl Account {
         mileage: f64,
         end_time: DateTime<Local>,
     ) -> Result<(), Box<dyn Error>> {
-        let headers: HeaderMap<HeaderValue> = (&HashMap::from([
+        let headers: HeaderMap<HeaderValue> = (&HashMap::<HeaderName, HeaderValue>::from([
+            (HOST, URL_BASE.parse()?),
+            (CONTENT_TYPE, "application/json".parse()?),
+            (ACCEPT, "*/*".parse()?),
+            (CONNECTION, "keep-alive".parse()?),
+            (
+                USER_AGENT,
+                format!(
+                    "QJGX/{} (com.ledreamer.legym; build:30000868; iOS 16.0.2) Alamofire/5.8.0",
+                    self.version
+                )
+                .parse()?,
+            ),
             (
                 ACCEPT_ENCODING,
-                "br;q=1.0, gzip;q=0.9, deflate;q=0.8".parse::<HeaderValue>()?,
+                "br;q=1.0, gzip;q=0.9, deflate;q=0.8".parse()?,
             ),
             (
                 ACCEPT_LANGUAGE,
                 "zh-Hans-HK;q=1.0, zh-Hant-HK;q=0.9, yue-Hant-HK;q=0.8".parse()?,
             ),
-            (AUTHORIZATION, ("Bearer ".to_owned() + &self.token).parse()?),
-            (
-                USER_AGENT,
-                "QJGX/3.8.2 (com.ledreamer.legym; build:30000812; iOS 16.0.2) Alamofire/5.6.2"
-                    .parse()?,
-            ),
-            (ACCEPT, "*/*".parse()?),
-            (CONNECTION, "keep-alive".parse()?),
-            (CONTENT_TYPE, "application/json".parse()?),
-            (HOST, "cpes.legym.cn".parse()?),
+            (AUTHORIZATION, format!("Bearer {}", &self.token).parse()?),
         ]))
             .try_into()?;
 
@@ -342,71 +374,124 @@ impl Account {
             return Err(String::from("Effective mileage too low").into());
         }
 
-        let keeptime;
-        let pace_range;
-        {
+        let keeptime = {
             // WARN: Must make sure that the rng dies before the await call
             let mut rng = thread_rng();
             mileage += rng.gen_range(-0.02..-0.001);
-            keeptime = (mileage * PACE) as i64 + rng.gen_range(-15..15);
-            pace_range = 0.6 + rng.gen_range(-0.05..0.05);
-        }
-
-        let start_time = end_time - Duration::try_seconds(keeptime).ok_or("Invalid duration")?;
-
-        let signdigital = {
-            self.hasher.update(
-                (mileage.to_string()
-                    + "1"
-                    + &start_time.format("%Y-%m-%d %H:%M:%S").to_string()
-                    + &((CALORIE_PER_MILEAGE * mileage) as i64).to_string()
-                    + &((keeptime as f64 / mileage) as i64 * 1000).to_string()
-                    + &keeptime.to_string()
-                    + &((mileage * 1000. / pace_range / 2.) as i64).to_string()
-                    + &mileage.to_string()
-                    + "1"
-                    + SALT)
-                    .as_bytes(),
-            );
-            hex::encode(self.hasher.finalize_fixed_reset())
+            (mileage * PACE) as i64 + rng.gen_range(-15..15)
         };
-        let json = json!({
-            "appVersion": self.version,
-            "avePace": (keeptime as f64 / mileage) as i64 * 1000,
-            "calorie": (CALORIE_PER_MILEAGE * mileage) as i64,
-            "deviceType": "iPhone 13 Pro",
-            "effectiveMileage": mileage,
-            "effectivePart": 1,
-            "endTime": end_time.format("%Y-%m-%d %H:%M:%S").to_string(),
-            "gpsMileage": mileage,
-            "keepTime": keeptime,
-            "limitationsGoalsSexInfoId": self.limitation,
-            "paceNumber": (mileage * 1000. / pace_range / 2.) as i64,
-            "paceRange": pace_range,
-            "routineLine": get_routine(mileage, geojson_str)?,
-            "scoringType": self.scoring,
-            "semesterId": self.semester,
-            "signDigital": signdigital,
-            "signPoint": [],
-            "startTime": start_time.format("%Y-%m-%d %H:%M:%S").to_string(),
-            "systemVersion": "16.0.2",
-            "totalMileage": mileage,
-            "totalPart": 1,
-            "type": "范围跑",
-            "uneffectiveReason": "",
-        });
+        let pace_range = 0.59999999999999998;
 
-        debug!("Upload running json: {}", json.to_string());
+        let start_time =
+            end_time - Duration::try_seconds(keeptime + 8).ok_or("Invalid duration")?;
 
-        self.client
+        let calorie = (CALORIE_PER_MILEAGE * mileage) as i64;
+        let ave_pace = (keeptime as f64 / mileage) as i64 * 1000;
+        let pace_number = (mileage * 1000. / pace_range / 2.) as i64;
+
+        let signdigital = security::hs(&format!(
+            "{}{}{}{}{}{}{}{}{}",
+            mileage,
+            1,
+            start_time.format("%Y-%m-%d %H:%M:%S"),
+            calorie,
+            ave_pace,
+            keeptime,
+            pace_number,
+            mileage,
+            1,
+        ));
+
+        let mut json = UploadRunningInfoBuilder::default()
+            .app_version(self.version.clone())
+            .ave_pace(ave_pace)
+            .calorie(calorie)
+            .device_type("iPhone 13 Pro".to_string())
+            .effective_mileage(mileage)
+            .effective_part(1)
+            .end_time(end_time.format("%Y-%m-%d %H:%M:%S").to_string())
+            .gps_mileage(mileage)
+            .keep_time(keeptime)
+            .limitations_goals_sex_info_id(self.limitation.clone())
+            .pace_number(pace_number)
+            .pace_range(pace_range)
+            .routine_line(get_routine(mileage, geojson_str)?)
+            .scoring_type(self.scoring)
+            .semester_id(self.semester.clone())
+            .sign_digital(signdigital)
+            .sign_point(vec![])
+            .start_time(start_time.format("%Y-%m-%d %H:%M:%S").to_string())
+            .system_version("16.0.2".to_string())
+            .total_mileage(mileage)
+            .total_part(1)
+            .run_type("自由跑".to_string())
+            .build()?;
+
+        sign_run_data(&mut json, &self.id, &self.school_id)?;
+
+        debug!("Upload running json: {}", format_json(&json)?);
+
+        let res = self
+            .client
             .post(URL_UPLOADRUNNING)
             .headers(headers)
             .json(&json)
             .send()
             .await?
-            .error_for_status()?;
+            .error_for_status()?
+            .text()
+            .await?;
 
         info!("Upload running successful!");
+        debug!("Upload running response: {}", res);
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+
+    use log::{Level, Metadata, Record};
+
+    struct SimpleLogger;
+
+    impl log::Log for SimpleLogger {
+        fn enabled(&self, metadata: &Metadata) -> bool {
+            metadata.level() <= Level::Debug
+        }
+
+        fn log(&self, record: &Record) {
+            if self.enabled(record.metadata()) {
+                println!("{} - {}", record.level(), record.args());
+            }
+        }
+
+        fn flush(&self) {}
+    }
+
+    static LOGGER: SimpleLogger = SimpleLogger;
+
+    #[tokio::test]
+    async fn test_upload_running() {
+        log::set_logger(&LOGGER).unwrap();
+
+        log::set_max_level(log::LevelFilter::Debug);
+
+        let username = env::var("USERNAME").unwrap();
+        let password = env::var("PASSWORD").unwrap();
+
+        let mut account = Account::new();
+        account.login(&username, &password).await.unwrap();
+
+        let geojson_str = include_str!("../../assets/map.geojson");
+        let mileage = 5.0;
+        let end_time = Local::now();
+
+        account
+            .upload_running(geojson_str, mileage, end_time)
+            .await
+            .unwrap();
     }
 }
