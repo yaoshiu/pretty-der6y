@@ -18,7 +18,7 @@
 
 use geo::{prelude::*, Point};
 use rand::{thread_rng, Rng};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::{error::Error, f64::consts::PI};
 
 // WGS-84 to GCJ-02 (Mars Coordinate System) conversion
@@ -68,7 +68,7 @@ fn wgs84_to_gcj02(lat: f64, lon: f64) -> (f64, f64) {
     (mglat, mglon)
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LGPoint {
     longitude: f64,
     latitude: f64,
