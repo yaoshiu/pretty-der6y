@@ -1,0 +1,28 @@
+name: Code Lint
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Clippy
+        run: rustup component add clippy
+      - name: Run Clippy
+        env:
+          BACKEND: ${{ secrets.BACKEND }}
+        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Code Spell Check
+        uses: streetsidesoftware/cspell-action@v6
+        with:
+          files: "**"
+          config: .cspell.json
+          strict: true
+          verbose: true
