@@ -379,8 +379,8 @@ impl Account {
             mileage += rng.gen_range(-0.02..-0.001);
             (mileage * PACE) as i64 + rng.gen_range(-15..15)
         };
-        #[allow(clippy::excessive_precision)]
-        let pace_range = 0.59999999999999998;
+
+        let pace_range = 0.6;
 
         let start_time =
             end_time - Duration::try_seconds(keep_time + 8).ok_or("Invalid duration")?;
