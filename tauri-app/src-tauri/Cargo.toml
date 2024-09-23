@@ -1,6 +1,6 @@
 [package]
 name = "pretty-der6y"
-version = "1.2.0"
+version = "1.2.1"
 description = "Hachimi hachimi hachimi~"
 authors = ["Fay Ash"]
 edition = "2021"
