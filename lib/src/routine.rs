@@ -57,15 +57,15 @@ fn wgs84_to_gcj02(lat: f64, lon: f64) -> (f64, f64) {
         return (lat, lon);
     }
 
-    let mut dlat = transform_lat(lon - 105.0, lat - 35.0);
-    let mut dlon = transform_lon(lon - 105.0, lat - 35.0);
-    let radlat = lat / 180.0 * PI;
-    let magic = (1.0 - EE * radlat.sin() * radlat.sin()).sqrt();
-    dlat = (dlat * 180.0) / ((A * (1.0 - EE)) / (magic * magic) * PI);
-    dlon = (dlon * 180.0) / (A / magic * radlat.cos() * PI);
-    let mglat = lat + dlat;
-    let mglon = lon + dlon;
-    (mglat, mglon)
+    let mut d_lat = transform_lat(lon - 105.0, lat - 35.0);
+    let mut d_lon = transform_lon(lon - 105.0, lat - 35.0);
+    let rad_lat = lat / 180.0 * PI;
+    let magic = (1.0 - EE * rad_lat.sin() * rad_lat.sin()).sqrt();
+    d_lat = (d_lat * 180.0) / ((A * (1.0 - EE)) / (magic * magic) * PI);
+    d_lon = (d_lon * 180.0) / (A / magic * rad_lat.cos() * PI);
+    let mg_lat = lat + d_lat;
+    let mg_lon = lon + d_lon;
+    (mg_lat, mg_lon)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -75,7 +75,7 @@ pub struct LGPoint {
 }
 
 pub fn get_routine(mut mileage: f64, geojson_str: &str) -> Result<Vec<LGPoint>, Box<dyn Error>> {
-    let mut ponits = Vec::new();
+    let mut points = Vec::new();
     let mut last = None;
     let mut rng = thread_rng();
     let geo_json: geojson::GeoJson = geojson_str.parse()?;
@@ -110,10 +110,10 @@ pub fn get_routine(mut mileage: f64, geojson_str: &str) -> Result<Vec<LGPoint>, 
             mileage -= last.unwrap().geodesic_distance(&point) / 1000.;
             last = Some(point);
 
-            ponits.push(new);
+            points.push(new);
 
             if mileage <= 0. {
-                return Ok(ponits);
+                return Ok(points);
             }
         }
     }

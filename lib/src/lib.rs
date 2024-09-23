@@ -97,11 +97,10 @@ impl Account {
             headers.insert(key, val.parse().unwrap());
         }
 
-        let mut new = Self::default();
-
-        new.headers = headers;
-
-        new
+        Self {
+            headers,
+            ..Default::default()
+        }
     }
 
     pub async fn login(&mut self, username: &str, password: &str) -> Result<(), Box<dyn Error>> {
@@ -380,7 +379,8 @@ impl Account {
             mileage += rng.gen_range(-0.02..-0.001);
             (mileage * PACE) as i64 + rng.gen_range(-15..15)
         };
-        let pace_range = 0.59999999999999998;
+
+        let pace_range = 0.6;
 
         let start_time =
             end_time - Duration::try_seconds(keep_time + 8).ok_or("Invalid duration")?;
