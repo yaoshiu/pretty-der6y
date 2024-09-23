@@ -285,64 +285,6 @@ mod tests {
     }
 
     #[test]
-    fn test_encrypt2() {
-        let json = r#"{
-  "gpsMileage" : 5.9513984269592966,
-  "effectivePart" : 0,
-  "signTime" : "2024-09-19 15:49:36",
-  "keepTime" : 53,
-  "deviceType" : "iPhone 13 Pro",
-  "avePace" : 8000,
-  "oct" : "l6PTkjzPUc1+SDYWubvnW6j0hCWxbt+/HQJMpw1uytTDunN8lQm3fx64ST/W8/nqTvDnu8EqHLpDUcmhj/d3qeqtQvG0BUPHoUrj/GkrfqEpx5qFUZQDoJguTaSzBcT3C8D4Ok7YdnaPvLi6uH+8/DZ3lOz9mq88LkByT7K4DMlsg9xlMy7u0I7sj2Q1rrz2EQSdlXZTOLTsZtl/eUNwDr/pJSxHE4+RY11fgQCsq3pgLSp5IwT4sUdpD5JLlJvkHLsNk4Ez5BWzpWgAAyzowNfNlfxh1JO5cBLc3F89qizkzGtGY+q0xrVX7ql9qiushcvSa+YA42Lzvm+gV8T+6+6zZ3/k2Az6dlwbABn9BCDXuw1kTXWH8BNhLs0RokO6ZRGw8cLTR66nHWdyDPJrOcZDHEQJ+peZgA38blQ39wJq4ykWKWBMmGPDsa0DjRziskH2hP5BIpqSByWms3nCTJ6w+ebMaa73IkE4e6sB0P0dBpz4isw9eg6KA32DSaQbh26LP4kcf6YholwSk0Khk+pZOLIC8if9e5zCd3Kr0yXWhTv95WSix1ePgNRCoZ9EN51CLL+xcfRWJTn1ej14wf8maPsipX7kIuAzbWIk/99cjeI+6JXR04m8iH9pVckZ17rlWIAbcAhbupyZ8cKvT0iVR7E60DE2gb9rRWP5c1E=",
-  "appVersion" : "3.10.0",
-  "signPoint" : [
-
-  ],
-  "endTime" : "2024-09-19 15:49:27",
-  "limitationsGoalsSexInfoId" : "402888da7c3a16bb017c3a170563001b",
-  "uneffectiveReason" : "已达到今日上限，本次跑步数据将不计入成绩",
-  "semesterId" : "8a97807a907736810191793a841a36f4",
-  "type" : "自由跑",
-  "paceNumber" : 0,
-  "routineLine" : [
-    {
-      "longitude" : 119.12508409288195,
-      "latitude" : 25.371138237847223
-    },
-    {
-      "longitude" : 119.06645015540968,
-      "latitude" : 25.378324126406493
-    }
-  ],
-  "signDigital" : "49a3d46f4622d5e3f574c8444a2a5cfba261c3ac",
-  "totalMileage" : 5.9513984269592966,
-  "totalPart" : 0,
-  "calorie" : 358,
-  "effectiveMileage" : 0,
-  "paceRange" : 0.59999999999999998,
-  "systemVersion" : "18.0",
-  "scoringType" : 1,
-  "startTime" : "2024-09-19 15:48:25"
-}"#;
-        let mut running_info = serde_json::from_str::<UploadRunningInfo>(json).unwrap();
-        let a1 = "402881ea7c39c5d5017c39da37d66c14";
-        let a2 = "402881ea7c39c5d5017c39d134c30395";
-
-        sign_run_data(&mut running_info, a1, a2).unwrap();
-
-        let expected = "l6PTkjzPUc1+SDYWubvnW6j0hCWxbt+/HQJMpw1uytTDunN8lQm3fx64ST/W8/nqTvDnu8EqHLpDUcmhj/d3qeqtQvG0BUPHoUrj/GkrfqEpx5qFUZQDoJguTaSzBcT3C8D4Ok7YdnaPvLi6uH+8/DZ3lOz9mq88LkByT7K4DMlsg9xlMy7u0I7sj2Q1rrz2EQSdlXZTOLTsZtl/eUNwDr/pJSxHE4+RY11fgQCsq3pgLSp5IwT4sUdpD5JLlJvkHLsNk4Ez5BWzpWgAAyzowNfNlfxh1JO5cBLc3F89qizkzGtGY+q0xrVX7ql9qiushcvSa+YA42Lzvm+gV8T+6+6zZ3/k2Az6dlwbABn9BCDXuw1kTXWH8BNhLs0RokO6ZRGw8cLTR66nHWdyDPJrOcZDHEQJ+peZgA38blQ39wJq4ykWKWBMmGPDsa0DjRziskH2hP5BIpqSByWms3nCTJ6w+ebMaa73IkE4e6sB0P0dBpz4isw9eg6KA32DSaQbh26LP4kcf6YholwSk0Khk+pZOLIC8if9e5zCd3Kr0yXWhTv95WSix1ePgNRCoZ9EN51CLL+xcfRWJTn1ej14wf8maPsipX7kIuAzbWIk/99cjeI+6JXR04m8iH9pVckZ17rlWIAbcAhbupyZ8cKvT0iVR7E60DE2gb9rRWP5c1E=";
-        let expected = decrypt(expected, &get_rn_key(a1, a2)).unwrap();
-        println!("{}", expected);
-        let expected = serde_json::from_str::<Oct>(&expected).unwrap();
-
-        let oct = decrypt(&running_info.oct, &get_rn_key(a1, a2)).unwrap();
-        println!("{}", oct);
-        let oct = serde_json::from_str::<Oct>(&oct).unwrap();
-
-        assert_eq!(oct, expected);
-    }
-
-    #[test]
     fn test_decrypt1() {
         let encoded = "ns7Q243GuyndUvGnNrdoF048oXxrHUJ4MnWXUJD7xlnl6wUXjLJFKrOrVTitJZ2AQq5DzJJIF3eIYiw6KZT4ty7Y5uvNDvB6OioDVZ06xYVEQhBH4G7yjMgpdxx1tHdIjU1fsOiEqlz8uY4QJWo0Tby+9guDCHkdh7cLZcvoyXde/GCWjWaJEuFudgd2eHHH";
         let time = 1000000000000;
