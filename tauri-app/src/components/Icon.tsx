@@ -32,15 +32,11 @@ import { type JSX, splitProps } from "solid-js";
  * @param {IconName | IconLookup} props.icon - The name or lookup object for the icon.
  * @returns {JSX.Element} The rendered icon component.
  */
-export const Icon = (
-  props: IconParams & {
-    icon: IconName | IconLookup;
-  },
-): JSX.Element => {
+export default function Icon(props: IconParams & {
+  icon: IconName | IconLookup;
+}): JSX.Element {
   const [local, others] = splitProps(props, ["icon"]);
   const iconNode = icon(local.icon, others).node[0];
 
   return iconNode;
-};
-
-export default Icon;
+}

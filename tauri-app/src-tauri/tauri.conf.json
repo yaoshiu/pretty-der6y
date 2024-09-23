@@ -1,4 +1,5 @@
 {
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Pretty Der6y",
   "version": "1.2.0",
   "identifier": "moe.phieash.pretty-der6y",
@@ -17,12 +18,14 @@
         "decorations": false,
         "center": true,
         "dragDropEnabled": false,
-        "maximizable": false
+        "maximizable": false,
+        "transparent": true
       }
     ],
     "security": {
       "csp": null
-    }
+    },
+    "macOSPrivateApi": true
   },
   "bundle": {
     "active": true,

@@ -25,11 +25,11 @@ import {
 } from "solid-js";
 import { useLogger } from "./Logger";
 
-const Uploader = (
+function Uploader(
   props: JSX.InputHTMLAttributes<HTMLInputElement> & {
     file: Signal<File | undefined>;
   },
-) => {
+) {
   const [local, others] = splitProps(props, ["file"]);
 
   const [file, setFile] = local.file;
@@ -106,6 +106,6 @@ const Uploader = (
       </label>
     </div>
   );
-};
+}
 
 export default Uploader;

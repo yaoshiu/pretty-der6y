@@ -21,11 +21,9 @@ import { type JSX, onMount, type Signal, splitProps } from "solid-js";
 import "leaflet/dist/leaflet.css";
 import { useLogger } from "./Logger";
 
-export const LeafletMap = (
-  props: JSX.HTMLAttributes<HTMLDivElement> & {
-    map: Signal<L.Map | undefined>;
-  },
-) => {
+export default function LeafletMap(props: JSX.HTMLAttributes<HTMLDivElement> & {
+  map: Signal<L.Map | undefined>;
+}) {
   const [local, others] = splitProps(props, ["ref", "map"]);
   const [, setMap] = local.map;
   const logger = useLogger();
@@ -42,7 +40,7 @@ export const LeafletMap = (
       async (error) => {
         // This can be annoying. Maybe we should just remove it.
         logger?.warn(
-          `Error getting location: ${error.message}, falling back to IP location`,
+          `Error getting location: ${error.message}, falling back to IP location`
         );
 
         const response = await fetch("https://ipapi.co/json/");
@@ -54,16 +52,15 @@ export const LeafletMap = (
           map.setView([latitude, longitude], 13);
         } else {
           logger?.error(
-            `Error getting location: ${response.statusText}, falling back to default location`,
+            `Error getting location: ${response.statusText}, falling back to default location`
           );
           map.setView([51.505, -0.09], 13);
         }
-      },
+      }
     );
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
-      attribution:
-        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
   });
 
@@ -77,9 +74,6 @@ export const LeafletMap = (
           local.ref = el;
         }
       }}
-      {...others}
-    />
+      {...others} />
   );
-};
-
-export default LeafletMap;
+}

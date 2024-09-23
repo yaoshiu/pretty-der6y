@@ -29,7 +29,7 @@ import Popover from "./Popover";
 
 clickOut; // avoid unused import warning
 
-const DatePicker = (props: { date: Signal<Date> }) => {
+export default function DatePicker(props: { date: Signal<Date> }) {
   type page = "year" | "month" | "day";
 
   const [date, setDate] = props.date;
@@ -315,5 +315,3 @@ const DatePicker = (props: { date: Signal<Date> }) => {
     </div>
   );
 };
-
-export default DatePicker;

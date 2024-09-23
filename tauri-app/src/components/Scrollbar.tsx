@@ -18,14 +18,12 @@
 
 import {
   createSignal,
+  type ParentProps,
   splitProps,
   type JSX,
-  type ParentComponent,
 } from "solid-js";
 
-const Scrollbar: ParentComponent<JSX.HTMLAttributes<HTMLDivElement>> = (
-  props,
-) => {
+function Scrollbar(props: ParentProps<JSX.HTMLAttributes<HTMLDivElement>>) {
   const [local, others] = splitProps(props, ["children", "ref"]);
   const [height, setHeight] = createSignal("");
   const [top, setTop] = createSignal("0");
@@ -107,11 +105,10 @@ const Scrollbar: ParentComponent<JSX.HTMLAttributes<HTMLDivElement>> = (
             "opacity-100": show() || dragging(),
             "opacity-0": !show() && !dragging(),
           }}
-          onMouseDown={startDrag}
-        />
+          onMouseDown={startDrag} />
       </div>
     </div>
   );
-};
+}
 
 export default Scrollbar;

@@ -18,13 +18,13 @@
 
 import { mergeProps, type JSX, type Signal } from "solid-js";
 
-const Slider = (props: {
+function Slider(props: {
   value: Signal<number>;
   width?: number;
   padding?: number;
   minimum?: number;
   maximum?: number;
-}) => {
+}) {
   const merged = mergeProps(
     {
       width: 24,
@@ -71,18 +71,14 @@ const Slider = (props: {
             class="h-full bg-gradient-to-r from-pink-300 to-cyan-300 rounded-full"
             style={{
               // 100% - ((100% - widthpx) * value / 100 + widthpx)
-              "clip-path": `inset(0 calc(${100 - value()}% + ${
-                (merged.width * (value() - 100)) / 100
-              }px) 0 0 round 999px)`,
+              "clip-path": `inset(0 calc(${100 - value()}% + ${(merged.width * (value() - 100)) / 100}px) 0 0 round 999px)`,
             }}
           >
             <div
               class="absolute shadow bg-white rounded-full cursor-pointer"
               style={{
                 // (100% - widthpx) * value / 100 + widthpx / 2 - (widthpx - 2paddingpx) / 2
-                left: `calc(${value()}% + ${
-                  merged.padding - (merged.width * value()) / 100
-                }px)`,
+                left: `calc(${value()}% + ${merged.padding - (merged.width * value()) / 100}px)`,
                 top: `${merged.padding}px`,
                 height: `${merged.width - merged.padding * 2}px`,
                 width: `${merged.width - merged.padding * 2}px`,
@@ -93,6 +89,6 @@ const Slider = (props: {
       </div>
     </div>
   );
-};
+}
 
 export default Slider;

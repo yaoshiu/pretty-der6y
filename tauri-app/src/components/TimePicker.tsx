@@ -35,7 +35,7 @@ import Scrollbar from "./Scrollbar";
 
 clickOut; // avoid unused import warning
 
-export const TimePicker = (props: { time: Signal<Date> }) => {
+export function TimePicker(props: { time: Signal<Date> }) {
   const [time, setTime] = props.time;
   const [show, setShow] = createSignal(false);
 
@@ -210,6 +210,6 @@ export const TimePicker = (props: { time: Signal<Date> }) => {
       </Show>
     </div>
   );
-};
+}
 
 export default TimePicker;

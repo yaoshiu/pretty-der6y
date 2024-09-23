@@ -37,7 +37,7 @@ export function useLogined() {
   return useContext(LoginedContext);
 }
 
-const Body = () => {
+function Body() {
   const [logined] = useLogined();
   const logger = useLogger();
   const [update, setUpdate] = createSignal<Update | null>(null);
@@ -67,9 +67,9 @@ const Body = () => {
       <Main />
     </Show>
   );
-};
+}
 
-const App = () => {
+function App() {
   const [logined, setLogined] = createSignal(false);
 
   return (
@@ -81,7 +81,7 @@ const App = () => {
             event.preventDefault();
           }
         }}
-        class="select-none"
+        class="select-none md:rounded-xl overflow-hidden"
       >
         <div class="hidden md:block">
           <TittleBar />
@@ -92,6 +92,6 @@ const App = () => {
       </div>
     </LoggerProvider>
   );
-};
+}
 
 export default App;
