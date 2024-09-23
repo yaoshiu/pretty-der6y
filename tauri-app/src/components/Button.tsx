@@ -18,19 +18,21 @@
 
 import { createSignal, For, mergeProps, splitProps, type JSX } from "solid-js";
 
-export default function Button(props: JSX.ButtonHTMLAttributes<HTMLButtonElement> & {
-  disabled?: boolean;
-}) {
+export default function Button(
+  props: JSX.ButtonHTMLAttributes<HTMLButtonElement> & {
+    disabled?: boolean;
+  },
+) {
   const merged = mergeProps(
     {
       type: "button" as const,
     },
-    props
+    props,
   );
   const [local, others] = splitProps(merged, ["onClick", "children"]);
 
   const [ripples, setRipples] = createSignal<
-    { x: number; y: number; size: number; }[]
+    { x: number; y: number; size: number }[]
   >([]);
 
   return (
@@ -65,7 +67,8 @@ export default function Button(props: JSX.ButtonHTMLAttributes<HTMLButtonElement
               left: `${x}px`,
               width: `${size}px`,
               height: `${size}px`,
-            }} />
+            }}
+          />
         )}
       </For>
     </button>

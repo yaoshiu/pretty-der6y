@@ -16,12 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {
-  createSignal,
-  type ParentProps,
-  splitProps,
-  type JSX,
-} from "solid-js";
+import { createSignal, type ParentProps, splitProps, type JSX } from "solid-js";
 
 function Scrollbar(props: ParentProps<JSX.HTMLAttributes<HTMLDivElement>>) {
   const [local, others] = splitProps(props, ["children", "ref"]);
@@ -105,7 +100,8 @@ function Scrollbar(props: ParentProps<JSX.HTMLAttributes<HTMLDivElement>>) {
             "opacity-100": show() || dragging(),
             "opacity-0": !show() && !dragging(),
           }}
-          onMouseDown={startDrag} />
+          onMouseDown={startDrag}
+        />
       </div>
     </div>
   );
