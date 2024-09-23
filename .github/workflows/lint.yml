@@ -1,0 +1,36 @@
+name: Code Lint
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Clippy
+        run: rustup component add clippy
+      - name: Install Tauri Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+      - name: Run Clippy
+        env:
+          BACKEND: ${{ secrets.BACKEND }}
+        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Code Spell Check
+        uses: streetsidesoftware/cspell-action@v6
+        with:
+          files: "**"
+          config: .cspell.json
+          strict: true
+          verbose: true

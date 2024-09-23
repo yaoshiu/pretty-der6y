@@ -35,16 +35,16 @@ const URL_BASE: &str = env!("BACKEND");
 
 const URL_CURRENT: &str = formatcp!("https://{}/education/semester/getCurrent", URL_BASE);
 
-const URL_GETRUNNINGLIMIT: &str = formatcp!("https://{}/running/app/getRunningLimit", URL_BASE);
+const URL_GET_RUNNING_LIMIT: &str = formatcp!("https://{}/running/app/getRunningLimit", URL_BASE);
 
-const URL_GETVERSION: &str = formatcp!(
+const URL_GET_VERSION: &str = formatcp!(
     "https://{}/authorization/mobileApp/getLastVersion?platform=2",
     URL_BASE
 );
 
 const URL_LOGIN: &str = formatcp!("https://{}/authorization/user/v2/manage/login", URL_BASE);
 
-const URL_UPLOADRUNNING: &str = formatcp!("https://{}/running//app/v3/upload", URL_BASE);
+const URL_UPLOAD_RUNNING: &str = formatcp!("https://{}/running//app/v3/upload", URL_BASE);
 
 const ORGANIZATION: HeaderName = HeaderName::from_static("organization");
 
@@ -108,12 +108,12 @@ impl Account {
         self.set_token(username, password).await?;
         self.set_current().await?;
         self.set_version().await?;
-        self.set_runnning_limit().await?;
+        self.set_running_limit().await?;
         Ok(())
     }
 
     async fn set_token(&mut self, username: &str, password: &str) -> Result<(), Box<dyn Error>> {
-        let signdigital = security::hs(&format!("{}{}1", username, password));
+        let sign_digital = security::hs(&format!("{}{}1", username, password));
 
         #[derive(Serialize)]
         #[serde(rename_all = "camelCase")]
@@ -128,7 +128,7 @@ impl Account {
             entrance: "1".to_string(),
             user_name: username.to_string(),
             password: password.to_string(),
-            sign_digital: signdigital.to_string(),
+            sign_digital: sign_digital.to_string(),
         };
 
         let json = format_json(request)?;
@@ -230,7 +230,7 @@ impl Account {
     async fn set_version(&mut self) -> Result<(), Box<dyn Error>> {
         let res = self
             .client
-            .get(URL_GETVERSION)
+            .get(URL_GET_VERSION)
             .headers(self.headers.clone())
             .send()
             .await?
@@ -257,14 +257,14 @@ impl Account {
         Ok(())
     }
 
-    async fn set_runnning_limit(&mut self) -> Result<(), Box<dyn Error>> {
+    async fn set_running_limit(&mut self) -> Result<(), Box<dyn Error>> {
         let json = json!({
             "semesterId": self.semester,
         });
 
         let res = self
             .client
-            .post(URL_GETRUNNINGLIMIT)
+            .post(URL_GET_RUNNING_LIMIT)
             .headers(self.headers.clone())
             .json(&json)
             .send()
@@ -374,7 +374,7 @@ impl Account {
             return Err(String::from("Effective mileage too low").into());
         }
 
-        let keeptime = {
+        let keep_time = {
             // WARN: Must make sure that the rng dies before the await call
             let mut rng = thread_rng();
             mileage += rng.gen_range(-0.02..-0.001);
@@ -383,20 +383,20 @@ impl Account {
         let pace_range = 0.59999999999999998;
 
         let start_time =
-            end_time - Duration::try_seconds(keeptime + 8).ok_or("Invalid duration")?;
+            end_time - Duration::try_seconds(keep_time + 8).ok_or("Invalid duration")?;
 
         let calorie = (CALORIE_PER_MILEAGE * mileage) as i64;
-        let ave_pace = (keeptime as f64 / mileage) as i64 * 1000;
+        let ave_pace = (keep_time as f64 / mileage) as i64 * 1000;
         let pace_number = (mileage * 1000. / pace_range / 2.) as i64;
 
-        let signdigital = security::hs(&format!(
+        let sign_digital = security::hs(&format!(
             "{}{}{}{}{}{}{}{}{}",
             mileage,
             1,
             start_time.format("%Y-%m-%d %H:%M:%S"),
             calorie,
             ave_pace,
-            keeptime,
+            keep_time,
             pace_number,
             mileage,
             1,
@@ -411,14 +411,14 @@ impl Account {
             .effective_part(1)
             .end_time(end_time.format("%Y-%m-%d %H:%M:%S").to_string())
             .gps_mileage(mileage)
-            .keep_time(keeptime)
+            .keep_time(keep_time)
             .limitations_goals_sex_info_id(self.limitation.clone())
             .pace_number(pace_number)
             .pace_range(pace_range)
             .routine_line(get_routine(mileage, geojson_str)?)
             .scoring_type(self.scoring)
             .semester_id(self.semester.clone())
-            .sign_digital(signdigital)
+            .sign_digital(sign_digital)
             .sign_point(vec![])
             .start_time(start_time.format("%Y-%m-%d %H:%M:%S").to_string())
             .system_version("16.0.2".to_string())
@@ -433,7 +433,7 @@ impl Account {
 
         let res = self
             .client
-            .post(URL_UPLOADRUNNING)
+            .post(URL_UPLOAD_RUNNING)
             .headers(headers)
             .json(&json)
             .send()
