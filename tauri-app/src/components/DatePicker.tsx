@@ -314,4 +314,4 @@ export default function DatePicker(props: { date: Signal<Date> }) {
       </Show>
     </div>
   );
-};
+}

@@ -39,6 +39,6 @@ export function TwoColumn(props: {
       </div>
     </div>
   );
-};
+}
 
 export default TwoColumn;
