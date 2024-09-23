@@ -18,11 +18,11 @@
 
 import type { JSX } from "solid-js";
 
-export const TwoColumn = (props: {
+export function TwoColumn(props: {
   first: JSX.Element;
   second: JSX.Element;
   scrollOnMobile?: boolean;
-}) => {
+}) {
   return (
     <div class="flex flex-col md:flex-row h-screen">
       <div

@@ -55,12 +55,12 @@ export function useLogger() {
   return useContext(LoggerContext);
 }
 
-const Log = (props: {
+function Log(props: {
   log: Log;
   timeout?: number;
   duration?: number;
   onRemove: () => void;
-}) => {
+}) {
   const levelColors = {
     DEBUG: "bg-blue-500",
     INFO: "bg-green-500",
@@ -110,9 +110,9 @@ const Log = (props: {
       </button>
     </li>
   );
-};
+}
 
-const Logs = (props: { logs: Signal<Log[]> }) => {
+function Logs(props: { logs: Signal<Log[]> }) {
   const [logs, setLogs] = props.logs;
 
   return (
@@ -125,12 +125,12 @@ const Logs = (props: { logs: Signal<Log[]> }) => {
       </For>
     </ul>
   );
-};
+}
 
-export const LoggerProvider = (props: {
+export function LoggerProvider(props: {
   timeout?: number;
   children: JSX.Element;
-}) => {
+}) {
   const merged = mergeProps({ timeout: 3000 }, props);
 
   const [logs, setLogs] = createSignal([] as Log[]);
@@ -164,6 +164,6 @@ export const LoggerProvider = (props: {
       {merged.children}
     </LoggerContext.Provider>
   );
-};
+}
 
 export default LoggerProvider;

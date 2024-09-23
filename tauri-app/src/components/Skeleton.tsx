@@ -18,7 +18,7 @@
 
 import { createSignal, mergeProps, onMount, Show, type JSX } from "solid-js";
 
-export const Skeleton = (props: { height?: string }) => {
+export function Skeleton(props: { height?: string }) {
   const merged = mergeProps({ height: "1rem" }, props);
 
   return (
@@ -29,7 +29,7 @@ export const Skeleton = (props: { height?: string }) => {
       }}
     />
   );
-};
+}
 
 /**
  * Renders a background component with a fallback skeleton while the image is loading.
@@ -39,7 +39,7 @@ export const Skeleton = (props: { height?: string }) => {
  * @param props.children - The child elements to be rendered inside the background component.
  * @returns The rendered background component.
  */
-export const Background = (props: { src: string; children: JSX.Element }) => {
+export function Background(props: { src: string; children: JSX.Element }) {
   const [loaded, setLoaded] = createSignal(false);
 
   onMount(() => {
@@ -64,6 +64,6 @@ export const Background = (props: { src: string; children: JSX.Element }) => {
       </div>
     </Show>
   );
-};
+}
 
 export default Skeleton;

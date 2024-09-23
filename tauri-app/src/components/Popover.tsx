@@ -18,7 +18,7 @@
 
 import type { JSX } from "solid-js";
 
-export const Popover = (props: JSX.HTMLAttributes<HTMLDivElement>) => {
+export function Popover(props: JSX.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       class="absolute w-max z-10 bg-white border border-gray-200 rounded-lg shadow-lg"
@@ -27,6 +27,6 @@ export const Popover = (props: JSX.HTMLAttributes<HTMLDivElement>) => {
       {props.children}
     </div>
   );
-};
+}
 
 export default Popover;

@@ -27,17 +27,15 @@ import { type JSX, mergeProps, splitProps } from "solid-js";
  * @param {JSX.Element} props.suffixContent - The content to be displayed after the input.
  * @returns {JSX.Element} The rendered input component.
  */
-export const Input = (
-  props: JSX.InputHTMLAttributes<HTMLInputElement> & {
-    prefixContent?: JSX.Element;
-    suffixContent?: JSX.Element;
-  },
-) => {
+export default function Input(props: JSX.InputHTMLAttributes<HTMLInputElement> & {
+  prefixContent?: JSX.Element;
+  suffixContent?: JSX.Element;
+}) {
   const merged = mergeProps(
     {
       type: "text",
     },
-    props,
+    props
   );
 
   const [local, others] = splitProps(merged, [
@@ -60,11 +58,9 @@ export const Input = (
             "pl-10": local.prefixContent !== undefined,
             "pr-10": local.suffixContent !== undefined,
           }}
-          {...others}
-        />
+          {...others} />
       </label>
     </div>
   );
-};
+}
 
-export default Input;

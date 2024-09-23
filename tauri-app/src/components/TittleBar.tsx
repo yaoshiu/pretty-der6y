@@ -22,11 +22,11 @@ import { onMount, type JSX } from "solid-js";
 import Icon from "./Icon";
 import { useLogger } from "./Logger";
 
-const TittleButton = (props: {
+function TittleButton(props: {
   children: JSX.Element;
   onClick: (event: MouseEvent) => void;
   onKeyPress?: (event: KeyboardEvent) => void;
-}) => {
+}) {
   return (
     <div
       class="inline-flex justify-center items-center w-8 h-8"
@@ -36,9 +36,9 @@ const TittleButton = (props: {
       {props.children}
     </div>
   );
-};
+}
 
-export const TittleBar = () => {
+export function TittleBar() {
   const logger = useLogger();
 
   let appWindow: Window | undefined;
@@ -65,6 +65,6 @@ export const TittleBar = () => {
       </TittleButton>
     </div>
   );
-};
+}
 
 export default TittleBar;
