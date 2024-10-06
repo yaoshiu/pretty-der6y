@@ -63,6 +63,7 @@ const HEADERS: [(HeaderName, &str); 9] = [
 
 const CALORIE_PER_MILEAGE: f64 = 58.3;
 const PACE: f64 = 360.;
+const PACE_RANGE: f64 = 0.6;
 
 fn format_json<T: Serialize>(json: T) -> Result<String, Box<dyn Error>> {
     let re = Regex::new(": ")?;
@@ -381,7 +382,7 @@ impl Account {
             (mileage * PACE) as i64 + rng.gen_range(-15..15)
         };
 
-        let pace_range = 0.6;
+        let pace_range = PACE_RANGE;
 
         let start_time =
             *end_time - Duration::try_seconds(keep_time + 8).ok_or("Invalid duration")?;
