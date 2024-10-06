@@ -3,7 +3,7 @@ name: daily run
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 19 * * *"
+    - cron: "0 13 * * *"
 
 jobs:
   build-and-execute:
@@ -33,8 +33,13 @@ jobs:
 
       - name: Execute
         run: |
+          RANDOM_SEC=$((RANDOM % 14400))
+
+          TIME=$(TZ="Asia/Shanghai" date -u -d "-$RANDOM_SEC seconds" +"%Y-%m-%d %H:%M:%S")
+
           ./target/release/cli \
             -u ${{ secrets.USERNAME }} \
             -p ${{ secrets.PASSWORD }} \
             -m 5 \
-            -r ./assets/map.geojson
+            -r ./assets/map.geojson \
+            -t "$TIME"
