@@ -1,6 +1,7 @@
 name: daily-run
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 19 * * *"
 
