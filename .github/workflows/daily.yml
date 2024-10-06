@@ -1,0 +1,38 @@
+name: daily-run
+
+on:
+  schedule:
+    - cron: "0 19 * * *"
+
+jobs:
+  build-and-execute:
+    environment: user
+
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install rust default
+        run: rustup update stable && rustup default stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+
+      - name: Build
+        run: |
+          cd cli
+          cargo build --release
+        env:
+          BACKEND: ${{ secrets.BACKEND }}
+
+      - name: Execute
+        run: ./target/release/clia \
+          -u ${{ secrets.USERNAME }} \
+          -p ${{ secrets.PASSWORD }} \
+          -m 5 \
+          -r ./assets/map.geojson
