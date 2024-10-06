@@ -32,9 +32,9 @@ jobs:
           BACKEND: ${{ secrets.BACKEND }}
 
       - name: Execute
-        run: >
-          ./target/release/cli
-            -u ${{ secrets.USERNAME }}
-            -p ${{ secrets.PASSWORD }}
-            -m 5
+        run: |
+          ./target/release/cli \
+            -u ${{ secrets.USERNAME }} \
+            -p ${{ secrets.PASSWORD }} \
+            -m 5 \
             -r ./assets/map.geojson
