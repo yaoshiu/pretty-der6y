@@ -19,7 +19,10 @@
 use std::{fs::File, io::Read};
 
 use clap::Parser;
-use lib::{Account, DateTime, Local};
+use lib::{
+    chrono::{Local, NaiveDateTime},
+    Account,
+};
 use log::{debug, info, Level, Metadata, Record};
 
 struct SimpleLogger {
@@ -84,9 +87,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     account.login(&args.username, &args.password).await?;
 
     let time = match args.time {
-        Some(time) => {
-            DateTime::parse_from_str(&time, "%Y-%m-%d %H:%M:%S").map(|t| t.with_timezone(&Local))?
-        }
+        Some(time) => NaiveDateTime::parse_from_str(&time, "%Y-%m-%d %H:%M:%S")
+            .map(|t| t.and_local_timezone(Local).earliest().unwrap())?,
         None => Local::now(),
     };
 

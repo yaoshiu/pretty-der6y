@@ -16,8 +16,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-use lib::{Account, DateTime, Local};
+use lib::{
+    chrono::{DateTime, Local},
+    Account,
+};
 use tauri::{async_runtime::Mutex, Manager, State};
 
 #[tauri::command]
