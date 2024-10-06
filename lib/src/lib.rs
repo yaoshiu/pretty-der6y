@@ -23,7 +23,8 @@ use log::{debug, info};
 use regex::Regex;
 use routine::*;
 
-use chrono::{DateTime, Duration, Local, Utc};
+pub use chrono::{DateTime, Local};
+use chrono::{Duration, Utc};
 use rand::{thread_rng, Rng};
 use reqwest::{header::*, Client, StatusCode};
 use security::{decode_ns, sign_run_data, UploadRunningInfoBuilder};
@@ -338,7 +339,7 @@ impl Account {
         &mut self,
         geojson_str: &str,
         mileage: f64,
-        end_time: DateTime<Local>,
+        end_time: &DateTime<Local>,
     ) -> Result<(), Box<dyn Error>> {
         let headers: HeaderMap<HeaderValue> = (&HashMap::<HeaderName, HeaderValue>::from([
             (HOST, URL_BASE.parse()?),
@@ -383,7 +384,7 @@ impl Account {
         let pace_range = 0.59999999999999998;
 
         let start_time =
-            end_time - Duration::try_seconds(keep_time + 8).ok_or("Invalid duration")?;
+            *end_time - Duration::try_seconds(keep_time + 8).ok_or("Invalid duration")?;
 
         let calorie = (CALORIE_PER_MILEAGE * mileage) as i64;
         let ave_pace = (keep_time as f64 / mileage) as i64 * 1000;
@@ -490,7 +491,7 @@ mod tests {
         let end_time = Local::now();
 
         account
-            .upload_running(geojson_str, mileage, end_time)
+            .upload_running(geojson_str, mileage, &end_time)
             .await
             .unwrap();
     }

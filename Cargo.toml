@@ -1,3 +1,3 @@
 [workspace]
 resolver = "2"
-members = ["lib", "tauri-app/src-tauri"]
+members = ["cli", "lib", "tauri-app/src-tauri"]

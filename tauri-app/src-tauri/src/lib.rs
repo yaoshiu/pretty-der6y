@@ -53,7 +53,7 @@ async fn upload(
         .with_timezone(&Local);
 
     account
-        .upload_running(geojson, mileage, end_time)
+        .upload_running(geojson, mileage, &end_time)
         .await
         .map_err(|e| e.to_string())
 }

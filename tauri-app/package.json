@@ -3,6 +3,7 @@
   "version": "1.2.1",
   "description": "Hachimi hachimi hachimi~",
   "type": "module",
+  "author": "Fay Ash",
   "scripts": {
     "start": "vite",
     "dev": "vite",
