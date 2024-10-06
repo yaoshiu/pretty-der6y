@@ -33,16 +33,13 @@ jobs:
 
       - name: Execute
         run: |
-          current=$(date +%s)
+          RANDOM_SEC=$((RANDOM % 14400))
 
-          random_sec=$((RANDOM % 14400))
-          random_time=$((current - random_sec))
-
-          time=$(date -d @$random_time '+%Y-%m-%d %H:%M:%S')
+          TIME=$(TZ="Asia/Shanghai" date -u -d "-$RANDOM_SEC seconds" +"%Y-%m-%d %H:%M:%S")
 
           ./target/release/cli \
             -u ${{ secrets.USERNAME }} \
             -p ${{ secrets.PASSWORD }} \
             -m 5 \
             -r ./assets/map.geojson \
-            -t "$time"
+            -t "$TIME"
