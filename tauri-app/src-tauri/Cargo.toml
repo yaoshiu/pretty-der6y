@@ -18,7 +18,6 @@ tauri-build = { version = "2.0.0-rc", features = [] }
 [dependencies]
 tauri = { version = "2.0.0-rc", features = ["macos-private-api"] }
 lib = { path = "../../lib" }
-chrono = "0.4.38"
 serde = "1.0.209"
 serde_json = "1.0.127"
 
