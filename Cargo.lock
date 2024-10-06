@@ -2743,7 +2743,6 @@ checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
 name = "pretty-der6y"
 version = "1.2.1"
 dependencies = [
- "chrono",
  "lib",
  "serde",
  "serde_json",
