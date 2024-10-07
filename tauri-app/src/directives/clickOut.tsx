@@ -26,7 +26,7 @@ import { onCleanup, type Accessor } from "solid-js";
  * @example
  * ```tsx
  * import { createSignal } from "solid-js";
- * import clickOut from "./derictives/clickOut";
+ * import clickOut from "@directives/clickOut";
  *
  * clickOut; // avoid unused import warning
  *

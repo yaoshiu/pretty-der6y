@@ -25,8 +25,8 @@ import {
   useContext,
 } from "solid-js";
 import Login from "./Login.tsx";
-import { LoggerProvider, useLogger } from "./components/Logger.tsx";
-import TittleBar from "./components/TittleBar.tsx";
+import { LoggerProvider, useLogger } from "@components/Logger.tsx";
+import TittleBar from "@components/TittleBar.tsx";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 
 const Main = lazy(() => import("./Main.tsx"));

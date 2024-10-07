@@ -30,7 +30,7 @@ import Input from "./Input";
 import Icon from "./Icon";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
 import Popover from "./Popover";
-import clickOut from "../derictives/clickOut";
+import clickOut from "@directives/clickOut";
 import Scrollbar from "./Scrollbar";
 
 clickOut; // avoid unused import warning
