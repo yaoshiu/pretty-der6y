@@ -54,6 +54,8 @@ struct Args {
     mileage: f64,
     #[arg(short, long)]
     route: String,
+
+    /// Time of the run, in the format "YYYY-MM-DD HH:MM:SS"
     #[arg(short, long)]
     time: Option<String>,
 
