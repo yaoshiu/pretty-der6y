@@ -17,15 +17,15 @@
 */
 
 import { createSignal } from "solid-js";
-import { Background } from "./components/Skeleton";
-import Button from "./components/Button";
-import Input from "./components/Input";
-import Icon from "./components/Icon";
+import { Background } from "@components/Skeleton";
+import Button from "@components/Button";
+import Input from "@components/Input";
+import Icon from "@components/Icon";
 import { useLogined } from "./App";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "@helpers/bindings";
 import { faLock, faUser } from "@fortawesome/free-solid-svg-icons";
-import { useLogger } from "./components/Logger";
-import TwoColumn from "./layouts/TwoColumn";
+import { useLogger } from "@components/Logger";
+import TwoColumn from "@layouts/TwoColumn";
 
 const image = "https://s2.loli.net/2024/08/26/gZOYyS7aECHuF9z.webp";
 
@@ -53,7 +53,8 @@ export default function Login() {
             onSubmit={(event) => {
               event.preventDefault();
               setPending(true);
-              invoke("login", { username: username(), password: password() })
+              commands
+                .login(username(), password())
                 .then(() => setLogined(true))
                 .catch((error) => {
                   logger?.error(`Error logging in: ${error}`);
