@@ -20,9 +20,12 @@ use lib::{
     chrono::{DateTime, Local},
     Account,
 };
+use specta_typescript::{formatter, BigIntExportBehavior, Typescript};
 use tauri::{async_runtime::Mutex, Manager, State};
+use tauri_specta::{collect_commands, Builder};
 
 #[tauri::command]
+#[specta::specta]
 async fn login(
     state: State<'_, Mutex<Account>>,
     username: &str,
@@ -36,12 +39,14 @@ async fn login(
 }
 
 #[tauri::command]
+#[specta::specta]
 async fn get_daily_limit(state: State<'_, Mutex<Account>>) -> Result<f64, String> {
     let account = state.lock().await;
     Ok(account.daily())
 }
 
 #[tauri::command]
+#[specta::specta]
 async fn upload(
     state: State<'_, Mutex<Account>>,
     geojson: &str,
@@ -61,6 +66,18 @@ async fn upload(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let builder =
+        Builder::<tauri::Wry>::new().commands(collect_commands![login, get_daily_limit, upload,]);
+
+    builder
+        .export(
+            Typescript::default()
+                .bigint(BigIntExportBehavior::Number)
+                .formatter(formatter::biome),
+            "../src/helpers/bindings.ts",
+        )
+        .expect("Failed to export typescript bindings");
+
     tauri::Builder::default()
         .setup(|app| {
             #[cfg(desktop)]

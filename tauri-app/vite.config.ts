@@ -15,6 +15,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+import path from "node:path";
 
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
@@ -37,14 +38,23 @@ export default defineConfig(async () => ({
     host: host || false,
     hmr: host
       ? {
-          protocol: "ws",
-          host,
-          port: 1421,
-        }
+        protocol: "ws",
+        host,
+        port: 1421,
+      }
       : undefined,
     watch: {
       // 3. tell vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
+    },
+  },
+
+  resolve: {
+    alias: {
+      "@components": path.resolve(__dirname, "./src/components"),
+      "@directives": path.resolve(__dirname, "./src/directives"),
+      "@helpers": path.resolve(__dirname, "./src/helpers"),
+      "@layouts": path.resolve(__dirname, "./src/layouts"),
     },
   },
 }));

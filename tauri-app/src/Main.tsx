@@ -17,17 +17,17 @@
 */
 
 import { createMemo, createSignal, onCleanup, onMount } from "solid-js";
-import DatePicker from "./components/DatePicker";
-import LeafletMap from "./components/LeafletMap";
-import TwoColumn from "./layouts/TwoColumn";
-import TimePicker from "./components/TimePicker";
-import Slider from "./components/Slider";
-import Uploader from "./components/Uploader";
-import Button from "./components/Button";
-import { useLogger } from "./components/Logger";
+import DatePicker from "@components/DatePicker";
+import LeafletMap from "@components/LeafletMap";
+import TwoColumn from "@layouts/TwoColumn";
+import TimePicker from "@components/TimePicker";
+import Slider from "@components/Slider";
+import Uploader from "@components/Uploader";
+import Button from "@components/Button";
+import { useLogger } from "@components/Logger";
 import * as L from "leaflet";
-import { invoke } from "@tauri-apps/api/core";
-import isDef from "./helpers/isDef";
+import { commands } from "@helpers/bindings";
+import isDef from "@helpers/isDef";
 
 export default function Main() {
   const logger = useLogger();
@@ -52,7 +52,8 @@ export default function Main() {
       tick = setTimeout(updateTime, delay);
     })();
 
-    invoke("get_daily_limit")
+    commands
+      .getDailyLimit()
       .then(setDaily)
       .catch((error) => {
         const message = error instanceof Error ? error.message : error;
@@ -118,11 +119,8 @@ export default function Main() {
               reader.onload = (event) => {
                 const data = event.target?.result;
                 if (typeof data === "string") {
-                  invoke("upload", {
-                    geojson: data,
-                    mileage: mileage(),
-                    endTime: time().getTime(),
-                  })
+                  commands
+                    .upload(data, mileage(), time().getTime())
                     .then(() => {
                       logger?.info("Upload successful!");
                     })
