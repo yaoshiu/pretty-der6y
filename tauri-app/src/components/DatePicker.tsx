@@ -22,7 +22,7 @@ import {
   faCalendar,
 } from "@fortawesome/free-solid-svg-icons";
 import { createMemo, createSignal, For, Show, type Signal } from "solid-js";
-import clickOut from "../derictives/clickOut";
+import clickOut from "@directives/clickOut";
 import Icon from "./Icon";
 import Input from "./Input";
 import Popover from "./Popover";
