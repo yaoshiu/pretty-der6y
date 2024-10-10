@@ -1,4 +1,5 @@
 <!-- markdownlint-configure-file
+line-length: false
 MD033:
   allowed_elements: [img, h1]
  -->
@@ -23,7 +24,7 @@ You can build the project from source by the following steps.
 #### Prerequisites
 
 - Rust toolchain including `rustc` and `cargo`.
-- A JavaScript runtime ([bun](bun.sh) recommended).
+- A JavaScript runtime ([bun](https://bun.sh) recommended).
 - For more information, check the [Tauri v2 documentation](https://v2.tauri.app/start/prerequisites/).
 
 #### Build Steps
@@ -46,7 +47,7 @@ bun tauri build
 
 ### Custom Route File
 
-The route file is in [GEOJSON](geojson.org) format. Route files for _Pretty Der6y_ should contain exactly **ONE** feature with a **SINGLE** `LineString`.
+The route file is in [GEOJSON](https://geojson.org) format. Route files for _Pretty Der6y_ should contain exactly **ONE** feature with a **SINGLE** `LineString`.
 
 You can create your route in [geojson.io](https://geojson.io).
 
