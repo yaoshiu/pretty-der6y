@@ -37,7 +37,7 @@ jobs:
       - name: setup deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: stable
+          deno-version: vx.x.x
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
