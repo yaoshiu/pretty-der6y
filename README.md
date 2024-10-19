@@ -24,7 +24,7 @@ You can build the project from source by the following steps.
 #### Prerequisites
 
 - Rust toolchain including `rustc` and `cargo`.
-- A JavaScript runtime ([bun](https://bun.sh) recommended).
+- A JavaScript runtime ([deno](https://deno.com) recommended).
 - For more information, check the [Tauri v2 documentation](https://v2.tauri.app/start/prerequisites/).
 
 #### Build Steps
@@ -37,10 +37,10 @@ git clone https://github.com/yaoshiu/pretty-der6y.git
 cd tauri-app
 
 # Install frontend dependencies
-bun install
+deno install --allow-scripts
 
 # Build the application
-bun tauri build
+deno run tauri build
 ```
 
 ## Usage
