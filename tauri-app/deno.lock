@@ -5,10 +5,11 @@
     "npm:@fortawesome/fontawesome-svg-core@^6.6.0": "6.6.0",
     "npm:@fortawesome/free-solid-svg-icons@^6.6.0": "6.6.0",
     "npm:@tauri-apps/api@^2.0.2": "2.0.2",
-    "npm:@tauri-apps/cli@^2.0.2": "2.0.3",
+    "npm:@tauri-apps/api@^2.0.3": "2.0.3",
+    "npm:@tauri-apps/cli@^2.0.3": "2.0.3",
     "npm:@tauri-apps/plugin-updater@2": "2.0.0",
     "npm:@types/geojson@^7946.0.14": "7946.0.14",
-    "npm:@types/leaflet@^1.9.12": "1.9.13",
+    "npm:@types/leaflet@^1.9.13": "1.9.13",
     "npm:@unocss/reset@~0.62.4": "0.62.4",
     "npm:globals@^15.11.0": "15.11.0",
     "npm:leaflet@^1.9.4": "1.9.4",
@@ -17,7 +18,7 @@
     "npm:typescript@^5.6.3": "5.6.3",
     "npm:unocss@~0.62.4": "0.62.4_vite@5.4.9",
     "npm:vite-plugin-solid@^2.10.2": "2.10.2_solid-js@1.9.2__seroval@1.1.1_vite@5.4.9_@babel+core@7.25.8",
-    "npm:vite@^5.4.8": "5.4.9"
+    "npm:vite@^5.4.9": "5.4.9"
   },
   "npm": {
     "@ampproject/remapping@2.3.0": {
@@ -501,6 +502,9 @@
     "@tauri-apps/api@2.0.2": {
       "integrity": "sha512-3wSwmG+1kr6WrgAFKK5ijkNFPp8TT3FLj3YHUb5EwMO+3FxX4uWlfSWkeeBy+Kc1RsKzugtYLuuya+98Flj+3w=="
     },
+    "@tauri-apps/api@2.0.3": {
+      "integrity": "sha512-840qk6n8rbXBXMA5/aAgTYsg5JAubKO0nXw5wf7IzGnUuYKGbB4oFBIZtXOIWy+E0kNTDI3qhq5iqsoMJfwp8g=="
+    },
     "@tauri-apps/cli-darwin-arm64@2.0.3": {
       "integrity": "sha512-jIsbxGWS+As1ZN7umo90nkql/ZAbrDK0GBT6UsgHSz5zSwwArICsZFFwE1pLZip5yoiV5mn3TGG2c1+v+0puzQ=="
     },
@@ -549,7 +553,7 @@
     "@tauri-apps/plugin-updater@2.0.0": {
       "integrity": "sha512-N0cl71g7RPr7zK2Fe5aoIwzw14NcdLcz7XMGFWZVjprsqgDRWoxbnUkknyCQMZthjhGkppCd/wN2MIsUz+eAhQ==",
       "dependencies": [
-        "@tauri-apps/api"
+        "@tauri-apps/api@2.0.2"
       ]
     },
     "@tsconfig/node10@1.0.11": {
@@ -1498,11 +1502,11 @@
         "npm:@biomejs/biome@1.8.3",
         "npm:@fortawesome/fontawesome-svg-core@^6.6.0",
         "npm:@fortawesome/free-solid-svg-icons@^6.6.0",
-        "npm:@tauri-apps/api@^2.0.2",
-        "npm:@tauri-apps/cli@^2.0.2",
+        "npm:@tauri-apps/api@^2.0.3",
+        "npm:@tauri-apps/cli@^2.0.3",
         "npm:@tauri-apps/plugin-updater@2",
         "npm:@types/geojson@^7946.0.14",
-        "npm:@types/leaflet@^1.9.12",
+        "npm:@types/leaflet@^1.9.13",
         "npm:@unocss/reset@~0.62.4",
         "npm:globals@^15.11.0",
         "npm:leaflet@^1.9.4",
@@ -1511,7 +1515,7 @@
         "npm:typescript@^5.6.3",
         "npm:unocss@~0.62.4",
         "npm:vite-plugin-solid@^2.10.2",
-        "npm:vite@^5.4.8"
+        "npm:vite@^5.4.9"
       ]
     }
   }
