@@ -40,7 +40,7 @@ export default function Main() {
 
   const mileage = createMemo(() => (percentage() * daily()) / 100);
 
-  let tick: NodeJS.Timeout;
+  let tick: number;
 
   onMount(() => {
     (function updateTime() {
@@ -54,7 +54,11 @@ export default function Main() {
 
     commands
       .getDailyLimit()
-      .then(setDaily)
+      .then((res) =>
+        res.status === "ok"
+          ? setDaily(res.data)
+          : logger?.error(`Error getting daily limit: ${res.error}`),
+      )
       .catch((error) => {
         const message = error instanceof Error ? error.message : error;
         logger?.error(`Error getting daily limit: ${message}`);
@@ -121,9 +125,11 @@ export default function Main() {
                 if (typeof data === "string") {
                   commands
                     .upload(data, mileage(), time().getTime())
-                    .then(() => {
-                      logger?.info("Upload successful!");
-                    })
+                    .then((res) =>
+                      res.status === "ok"
+                        ? logger?.info("Upload successful!")
+                        : logger?.error(`Error uploading: ${res.error}`),
+                    )
                     .catch((error) => {
                       logger?.error(`Error uploading: ${error}`);
                     })

@@ -55,7 +55,11 @@ export default function Login() {
               setPending(true);
               commands
                 .login(username(), password())
-                .then(() => setLogined(true))
+                .then((res) =>
+                  res.status === "ok"
+                    ? setLogined(true)
+                    : logger?.error(`Error logging in: ${res.error}`),
+                )
                 .catch((error) => {
                   logger?.error(`Error logging in: ${error}`);
                 })
