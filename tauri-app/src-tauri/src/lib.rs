@@ -20,6 +20,8 @@ use lib::{
     chrono::{DateTime, Local},
     Account,
 };
+
+#[cfg(debug_assertions)]
 use specta_typescript::{formatter, BigIntExportBehavior, Typescript};
 use tauri::{async_runtime::Mutex, Manager, State};
 use tauri_specta::{collect_commands, Builder};
