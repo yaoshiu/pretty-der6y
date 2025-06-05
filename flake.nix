@@ -44,7 +44,6 @@
             cargo-tauri # Optional, Only needed if Tauri doesn't work through the traditional way.
             nodejs
 
-            pkgs.android-studio
             glibc
             openjdk
           ];

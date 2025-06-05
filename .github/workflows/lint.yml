@@ -27,10 +27,6 @@ jobs:
         env:
           BACKEND: ${{ secrets.BACKEND }}
         run: cargo clippy --all-targets --all-features -- -D warnings
+
       - name: Code Spell Check
-        uses: streetsidesoftware/cspell-action@v7
-        with:
-          files: "**"
-          config: .cspell.json
-          strict: true
-          verbose: true
+        uses: crate-ci/typos@v1
