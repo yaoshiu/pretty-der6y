@@ -77,6 +77,8 @@ jobs:
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: App v${{ steps.app-version.outputs.version_string }}
           tag_name: v${{ steps.app-version.outputs.version_string }}
