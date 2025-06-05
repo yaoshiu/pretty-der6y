@@ -32,7 +32,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{collections::HashMap, error::Error};
 
-const URL_BASE: &str = env!("BACKEND");
+const URL_BASE: &str = uncaesar!("fshv.ohjbp.fq");
 
 const URL_CURRENT: &str = formatcp!("https://{}/education/semester/getCurrent", URL_BASE);
 

@@ -29,6 +29,7 @@ use sha1::{Digest, Sha1};
 
 use crate::LGPoint;
 
+#[macro_export]
 macro_rules! uncaesar {
     ($text: expr) => {{
         const TEXT: &str = $text;
