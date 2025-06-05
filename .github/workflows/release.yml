@@ -48,7 +48,7 @@ jobs:
         uses: swatinem/rust-cache@v2
 
       - name: install frontend dependencies
-        run: npm install
+        run: npm install --no-package-lock
         working-directory: ./tauri-app
 
       - uses: tauri-apps/tauri-action@v0

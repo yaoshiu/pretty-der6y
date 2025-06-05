@@ -65,7 +65,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: tauri-app
-        run: npm install
+        run: npm install --no-package-lock
 
       - name: Build APK
         working-directory: tauri-app
