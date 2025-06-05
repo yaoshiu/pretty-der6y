@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Pretty Der6y",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "identifier": "moe.phieash.pretty-der6y",
   "build": {
     "beforeDevCommand": "npm run dev",
