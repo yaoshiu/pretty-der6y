@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: lts/*
           cache: npm
-          cache-dependency-path: tauri-apps/package-lock.json
+          cache-dependency-path: tauri-app/package-lock.json
 
       - name: Setup Java
         uses: actions/setup-java@v4
