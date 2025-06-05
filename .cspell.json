@@ -1,13 +1,14 @@
 {
-    "words": [
-        "Alamofire",
-        "chrono",
-        "consts",
-        "formatcp",
-        "KHTML",
-        "ledreamer",
-        "legym",
-        "QJGX",
-        "reqwest"
-    ]
+  "unknownWords": "report-simple",
+  "words": [
+    "Alamofire",
+    "chrono",
+    "consts",
+    "formatcp",
+    "KHTML",
+    "ledreamer",
+    "legym",
+    "QJGX",
+    "reqwest
+  ]
 }
