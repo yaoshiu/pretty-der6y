@@ -66,11 +66,11 @@ async fn upload(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let builder =
+    let _builder =
         Builder::<tauri::Wry>::new().commands(collect_commands![login, get_daily_limit, upload,]);
 
     #[cfg(debug_assertions)] // only export typescript bindings in debug mode
-    builder
+    _builder
         .export(
             Typescript::default()
                 .bigint(BigIntExportBehavior::Number)
