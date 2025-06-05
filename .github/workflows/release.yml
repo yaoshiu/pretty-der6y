@@ -34,10 +34,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: setup deno
-        uses: denoland/setup-deno@v2
+      - name: setup node
+        uses: actions/setup-node@v4
         with:
-          deno-version: vx.x.x
+          node-version: lts/*
+          cache: npm
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -50,7 +51,7 @@ jobs:
           workspaces: ". -> target"
 
       - name: install frontend dependencies
-        run: deno install --allow-scripts
+        run: npm install
         working-directory: ./tauri-app
 
       - uses: tauri-apps/tauri-action@v0
@@ -67,4 +68,4 @@ jobs:
           prerelease: false
           args: ${{ matrix.args }}
           projectPath: ./tauri-app
-          tauriScript: deno run tauri
+          tauriScript: npm run tauri
