@@ -69,10 +69,9 @@ jobs:
 
       - name: Build APK
         working-directory: tauri-app
-        run: npm run tauri android build -v
+        run: npm run tauri android build
         env:
           NDK_HOME: /usr/local/lib/android/sdk/ndk/27.0.11902837
-
       
       - name: Get Tauri App Version
         id: app-version
