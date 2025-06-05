@@ -4,9 +4,9 @@
   "version": "1.2.3",
   "identifier": "moe.phieash.pretty-der6y",
   "build": {
-    "beforeDevCommand": "deno run dev",
+    "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "deno run build",
+    "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },
   "app": {
