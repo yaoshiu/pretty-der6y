@@ -43,22 +43,24 @@ function Body() {
   const [update, setUpdate] = createSignal<Update | null>(null);
 
   onMount(async () => {
-    try {
-      logger?.info("Checking for updates...");
-      setUpdate(await check());
-      logger?.info(
-        update()?.available
-          ? `${update()?.version} is available! Downloading...`
-          : "Newest release!",
-      );
-      await update()?.downloadAndInstall((event) => {
-        if (event.event === "Finished") {
-          logger?.info("Update installed, restart to apply!");
-        }
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : error;
-      logger?.error(`Error checking for updates: ${message}`);
+    if (window.innerWidth > 768) {
+      try {
+        logger?.info("Checking for updates...");
+        setUpdate(await check());
+        logger?.info(
+          update()
+            ? `${update()?.version} is available! Downloading...`
+            : "Newest release!",
+        );
+        await update()?.downloadAndInstall((event) => {
+          if (event.event === "Finished") {
+            logger?.info("Update installed, restart to apply!");
+          }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : error;
+        logger?.error(`Error checking for updates: ${message}`);
+      }
     }
   });
 
