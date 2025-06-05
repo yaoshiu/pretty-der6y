@@ -1,0 +1,87 @@
+name: "publish android"
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+
+jobs:
+  publish-android:
+    environment: release
+
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: true
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - name: Cache NDK
+        id: cache-ndk
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/lib/android/sdk/ndk/27.0.11902837
+          key: ndk-${{ runner.os }}-27.0.11902837
+
+      - name: Setup Android SDK and NDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 12266719
+
+      - name: Install NDK
+        run: sdkmanager "ndk;27.0.11902837"
+
+      - name: Install Rust targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android, x86_64-linux-android
+
+      - name: Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+
+      - name: Setup Android signing
+        working-directory: tauri-app
+        run: |
+          cd src-tauri/gen/android
+          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" > keystore.properties
+          echo "password=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore.properties
+          base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
+          echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
+          echo "Keystore properties created."
+
+      - name: Install dependencies
+        working-directory: tauri-app
+        run: npm install
+
+      - name: Build APK
+        working-directory: tauri-app
+        run: npm run tauri android build -v
+        env:
+          NDK_HOME: /usr/local/lib/android/sdk/ndk/27.0.11902837
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          name: App v${{ steps.app-version.outputs.version_string }}
+          tag_name: v${{ steps.app-version.outputs.version_string }}
+          body: "See the assets to download this version and install."
+          draft: true
+          prerelease: false
+          files: |
+            ./tauri-app/src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
+
