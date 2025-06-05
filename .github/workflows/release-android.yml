@@ -76,6 +76,7 @@ jobs:
       
       - name: Get Tauri App Version
         id: app-version
+        working-directory: tauri-app
         run: |
           CARGO_TOML_PATH="src-tauri/Cargo.toml"
           echo "Attempting to read version from $CARGO_TOML_PATH"
