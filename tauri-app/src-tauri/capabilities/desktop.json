@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop",
+  "description": "Capability for the desktop platforms",
+  "windows": ["main"],
+  "permissions": ["updater:default"],
+  "platforms": ["windows", "macOS", "linux"]
+}

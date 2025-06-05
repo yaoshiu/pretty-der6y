@@ -58,6 +58,28 @@ function Slider(props: {
     document.addEventListener("mouseup", endDrag);
   };
 
+  const startTouch: JSX.EventHandler<HTMLDivElement, TouchEvent> = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    function onTouch(event: TouchEvent) {
+      const availableLeft = rect.left + merged.width / 2;
+      const availableWidth = rect.width - merged.width;
+      const newValue =
+        ((event.touches[0].clientX - availableLeft) * 100) / availableWidth;
+      setValue(Math.min(Math.max(newValue, 0), 100));
+    }
+
+    onTouch(event);
+
+    function endTouch() {
+      document.removeEventListener("touchmove", onTouch);
+      document.removeEventListener("touchend", endTouch);
+    }
+
+    document.addEventListener("touchmove", onTouch);
+    document.addEventListener("touchend", endTouch);
+  };
+
   return (
     <div
       class="relative w-full"
@@ -66,7 +88,11 @@ function Slider(props: {
       }}
     >
       <div class="relative h-full w-full shadow-inner bg-gray-300 rounded-full overflow-hidden">
-        <div class="drop-shadow h-full w-full" onMouseDown={startDrag}>
+        <div
+          class="drop-shadow h-full w-full"
+          onMouseDown={startDrag}
+          onTouchStart={startTouch}
+        >
           <div
             class="h-full bg-gradient-to-r from-pink-300 to-cyan-300 rounded-full"
             style={{

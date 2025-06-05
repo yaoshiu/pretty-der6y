@@ -70,6 +70,7 @@ pub fn run() {
         Builder::<tauri::Wry>::new().commands(collect_commands![login, get_daily_limit, upload,]);
 
     #[cfg(debug_assertions)] // only export typescript bindings in debug mode
+    #[cfg(desktop)]
     _builder
         .export(
             Typescript::default()
