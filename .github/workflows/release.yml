@@ -39,6 +39,7 @@ jobs:
         with:
           node-version: lts/*
           cache: npm
+          cache-dependency-path: tauri-apps/package-lock.json
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
